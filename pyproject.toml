@@ -1,0 +1,166 @@
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+[project]
+name = "pyhubctl"
+dynamic = ["version"]
+description = "Allows to switch power on usb hubs"
+readme = "README.md"
+requires-python = ">=3.8"
+authors = [
+    { name = "Hans Märki", email = "buhtig.hans.maerki@ergoinfo.ch" },
+]
+classifiers = [
+    "Intended Audience :: Information Technology",
+    "Operating System :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python",
+    "Topic :: Internet",
+    "Topic :: Software Development :: Libraries",
+    "Topic :: Software Development",
+    "Typing :: Typed",
+    "Development Status :: 4 - Beta",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Programming Language :: Python :: 3.12 :: Only",
+]
+dependencies = [
+]
+
+[project.urls]
+Homepage = "https://github.com/octoprobe/pyhubctl"
+Documentation = "https://github.com/octoprobe/pyhubctl"
+Repository = "https://github.com/octoprobe/pyhubctl"
+
+[project.optional-dependencies]
+
+standard = [
+]
+
+all = [
+]
+
+[tool.pdm]
+version = { source = "file", path = "pyhubctl/__init__.py" }
+distribution = true
+
+[tool.pdm.build]
+source-includes = [
+    "tests/",
+    "requirements*.txt",
+    ]
+
+[tool.mypy]
+strict = true
+
+
+[[tool.mypy.overrides]]
+module = "pyhubctl.tests.*"
+ignore_missing_imports = true
+check_untyped_defs = true
+
+[tool.pytest.ini_options]
+pythonpath = "."
+addopts = [
+  # "-m", "not live",
+  "--strict-config",
+  "--strict-markers",
+  "--ignore=docs",
+]
+markers = [
+    "live: Test on real usb hubs",
+]
+testpaths = "tests"
+xfail_strict = true
+junit_family = "xunit2"
+filterwarnings = [
+    "error",
+    # TODO: needed by asyncio in Python 3.9.7 https://bugs.python.org/issue45097, try to remove on 3.9.8
+    'ignore:The loop argument is deprecated since Python 3\.8, and scheduled for removal in Python 3\.10:DeprecationWarning:asyncio',
+    'ignore:starlette.middleware.wsgi is deprecated and will be removed in a future release\..*:DeprecationWarning:starlette',
+    # TODO: remove after upgrading HTTPX to a version newer than 0.23.0
+    # Including PR: https://github.com/encode/httpx/pull/2309
+    "ignore:'cgi' is deprecated:DeprecationWarning",
+    # For passlib
+    "ignore:'crypt' is deprecated and slated for removal in Python 3.13:DeprecationWarning",
+    # TODO remove pytest-cov
+    'ignore::pytest.PytestDeprecationWarning:pytest_cov',
+    # TODO: remove after upgrading SQLAlchemy to a version that includes the following changes
+    # https://github.com/sqlalchemy/sqlalchemy/commit/59521abcc0676e936b31a523bd968fc157fef0c2
+    'ignore:datetime\.datetime\.utcfromtimestamp\(\) is deprecated and scheduled for removal in a future version\..*:DeprecationWarning:sqlalchemy',
+    # TODO: remove after upgrading python-jose to a version that explicitly supports Python 3.12
+    # also, if it won't receive an update, consider replacing python-jose with some alternative
+    # related issues:
+    #   - https://github.com/mpdavis/python-jose/issues/332
+    #   - https://github.com/mpdavis/python-jose/issues/334
+    'ignore:datetime\.datetime\.utcnow\(\) is deprecated and scheduled for removal in a future version\..*:DeprecationWarning:jose',
+]
+
+[tool.coverage.run]
+parallel = true
+source = [
+    "tests",
+    "pyhubctl"
+]
+context = '${CONTEXT}'
+omit = [
+    "docs_src/response_model/tutorial003_04.py",
+    "docs_src/response_model/tutorial003_04_py310.py",
+]
+
+[tool.ruff]
+target-version = "py312"
+# All paths are relative to the project root, which is the directory containing the pyproject.toml.
+src = ["pyhubctl", "tests"]
+
+[tool.ruff.lint]
+select = [
+    "E",  # pycodestyle errors
+    "W",  # pycodestyle warnings
+    "F",  # pyflakes
+    # "I",  # isort
+    "I001", # isort
+    "B",  # flake8-bugbear
+    "C4",  # flake8-comprehensions
+    "UP",  # pyupgrade
+]
+ignore = [
+    "E501",  # line too long, handled by black
+    "B008",  # do not perform function calls in argument defaults
+    "C901",  # too complex
+    "W191",  # indentation contains tabs
+    "D",     # enable docstring checks
+]
+
+
+[tool.ruff.lint.per-file-ignores]
+"pyhubctl/__init__.py" = ["F401", "I001"]
+"pyhubctl/known_hubs/__init__.py" = ["F401", "I001"]
+
+[tool.ruff.lint.isort]
+# known-third-party = ["pyhubctl"]
+# known-local-folder = ["pyhubctl"]
+case-sensitive = true
+combine-as-imports = true
+order-by-type = false
+section-order = [
+  "future",
+  "standard-library",
+  "third-party",
+  "first-party",
+  "local-folder",
+  "testing"
+]
+
+[tool.ruff.lint.pyupgrade]
+# Preserve types, even if a file imports `from __future__ import annotations`.
+keep-runtime-typing = true
+
+[tool.pylint."MESSAGES CONTROL"]
+disable = '''
+    missing-module-docstring,
+    missing-class-docstring,
+    missing-function-docstring,
+    logging-fstring-interpolation
+'''

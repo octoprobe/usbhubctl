@@ -1,0 +1,63 @@
+{
+	"folders": [
+		{
+			"path": "."
+		}
+	],
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Python Debugger: Current File",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${file}",
+				"cwd": "${workspaceFolder}",
+				"console": "integratedTerminal",
+				"env": {
+					"PYTHONPATH": "${workspaceFolder}",
+				}
+			},
+			{
+				"name": "Python Debugger: Current File with Arguments",
+				"type": "debugpy",
+				"request": "launch",
+				"program": "${file}",
+				"cwd": "${workspaceFolder}",
+				"console": "integratedTerminal",
+				"env": {
+					"PYTHONPATH": "${workspaceFolder}",
+				},
+				"args": "${command:pickArgs}"
+			},
+			{
+				"name": "pytest",
+				"type": "debugpy",
+				"request": "launch",
+				"module": "pytest",
+				"cwd": "${workspaceFolder}",
+				"console": "integratedTerminal",
+				"env": {
+					"PYTHONPATH": "${workspaceFolder}",
+				},
+			}
+		],
+		"compounds": []
+	},
+	"settings": {
+		"[python]": {
+			"editor.formatOnSave": true,
+			"editor.defaultFormatter": "charliermarsh.ruff"
+		},
+		// "ruff.enable": true,
+		// "ruff.fixAll": true,
+		// "ruff.lint.enable": true,
+		"ruff.lint.run": "onSave",
+		"mpremote.srcSubdirectory": "src"
+	},
+	"extensions": {
+		"recommendations": [
+			"charliermarsh.ruff"
+		]
+	}
+}
