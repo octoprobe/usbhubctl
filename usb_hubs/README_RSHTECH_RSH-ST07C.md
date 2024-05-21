@@ -26,7 +26,7 @@ USD29
 
 ## Hub Topology
 
-See [rsh_st07c.py](../pyhubctl/known_hubs/rsh_st07c.py)
+See [rsh_st07c.py](../usbhubctl/known_hubs/rsh_st07c.py)
 
 * Uses 2109:0822/2109:2822 Via Labs chip
 * Uses 0bda:0411/0bda:5411 Realtek chip

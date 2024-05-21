@@ -1,6 +1,6 @@
-# pyhubctl
+# usbhubctl
 
-`pyhubctl` extends [uhubctl](https://github.com/mvp/uhubctl).
+`usbhubctl` extends [uhubctl](https://github.com/mvp/uhubctl).
 
 ## State of this project
 
@@ -28,7 +28,7 @@ I would like to switch on power on plug 3 on my RSH_A16 hub.
 
 Now I can issue `uhubctl -l 3-4.6.1 -p 3 --action on`.
 
-### Solution with `pyhubctl/uhbuctl`
+### Solution with `usbhubctl/uhbuctl`
 
 This is the topology of the RSH_A16.
 
@@ -66,7 +66,7 @@ Here you see the 5 internal hub-chips and to which usb-plugs the are connected.
 This code will power on usb-plug number 3:
 
 ```python
-from pyhubctl.known_hubs import rsh_a10, rsh_a16
+from usbhubctl.known_hubs import rsh_a10, rsh_a16
 
 # Call `lsusb -tv` and find all connected RSH_A16
 hubs = rsh_a16.find_connected_hubs()

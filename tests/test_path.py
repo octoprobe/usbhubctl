@@ -1,5 +1,5 @@
-from pyhubctl import Topology
-from pyhubctl.known_hubs import rsh_a16
+from usbhubctl import Topology
+from usbhubctl.known_hubs import rsh_a16
 
 import pytest
 

@@ -1,5 +1,5 @@
-from pyhubctl import Path
-from pyhubctl.pyhubctl import BackendPowerABC
+from usbhubctl import Path
+from usbhubctl.usbhubctl import BackendPowerABC
 
 from .util_subprocess import subprocess_run
 

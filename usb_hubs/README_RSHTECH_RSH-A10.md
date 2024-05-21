@@ -29,7 +29,7 @@ Are very similar RSH-A10 / RSH-A16
 
 ## Hub Topology
 
-See [rsh_a10.py](../pyhubctl/known_hubs/rsh_a10.py)
+See [rsh_a10.py](../usbhubctl/known_hubs/rsh_a10.py)
 
 
 ## Internals

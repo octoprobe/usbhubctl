@@ -22,7 +22,7 @@ https://www.aliexpress.com/item/1005006130981731.html
 
 ## Hub Topology
 
-See [rsh_a07.py](../pyhubctl/known_hubs/rsh_a107.py)
+See [rsh_a07.py](../usbhubctl/known_hubs/rsh_a107.py)
 
 
 ## Internals

@@ -1,4 +1,4 @@
-from pyhubctl import Topology, get_real_topology
+from usbhubctl import Topology, get_real_topology
 
 from .util_subprocess import subprocess_run
 

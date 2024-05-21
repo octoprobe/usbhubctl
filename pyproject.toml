@@ -3,7 +3,7 @@ requires = ["pdm-backend"]
 build-backend = "pdm.backend"
 
 [project]
-name = "pyhubctl"
+name = "usbhubctl"
 dynamic = ["version"]
 description = "Allows to switch power on usb hubs"
 readme = "README.md"
@@ -29,9 +29,9 @@ dependencies = [
 ]
 
 [project.urls]
-Homepage = "https://github.com/octoprobe/pyhubctl"
-Documentation = "https://github.com/octoprobe/pyhubctl"
-Repository = "https://github.com/octoprobe/pyhubctl"
+Homepage = "https://github.com/octoprobe/usbhubctl"
+Documentation = "https://github.com/octoprobe/usbhubctl"
+Repository = "https://github.com/octoprobe/usbhubctl"
 
 [project.optional-dependencies]
 
@@ -42,7 +42,7 @@ all = [
 ]
 
 [tool.pdm]
-version = { source = "file", path = "pyhubctl/__init__.py" }
+version = { source = "file", path = "usbhubctl/__init__.py" }
 distribution = true
 
 [tool.pdm.build]
@@ -56,7 +56,7 @@ strict = true
 
 
 [[tool.mypy.overrides]]
-module = "pyhubctl.tests.*"
+module = "usbhubctl.tests.*"
 ignore_missing_imports = true
 check_untyped_defs = true
 
@@ -101,7 +101,7 @@ filterwarnings = [
 parallel = true
 source = [
     "tests",
-    "pyhubctl"
+    "usbhubctl"
 ]
 context = '${CONTEXT}'
 omit = [
@@ -112,7 +112,7 @@ omit = [
 [tool.ruff]
 target-version = "py312"
 # All paths are relative to the project root, which is the directory containing the pyproject.toml.
-src = ["pyhubctl", "tests"]
+src = ["usbhubctl", "tests"]
 
 [tool.ruff.lint]
 select = [
@@ -135,12 +135,12 @@ ignore = [
 
 
 [tool.ruff.lint.per-file-ignores]
-"pyhubctl/__init__.py" = ["F401", "I001"]
-"pyhubctl/known_hubs/__init__.py" = ["F401", "I001"]
+"usbhubctl/__init__.py" = ["F401", "I001"]
+"usbhubctl/known_hubs/__init__.py" = ["F401", "I001"]
 
 [tool.ruff.lint.isort]
-# known-third-party = ["pyhubctl"]
-# known-local-folder = ["pyhubctl"]
+# known-third-party = ["usbhubctl"]
+# known-local-folder = ["usbhubctl"]
 case-sensitive = true
 combine-as-imports = true
 order-by-type = false

@@ -2,7 +2,7 @@ __version__ = "0.0.11"
 
 __all__ = ["Hub", "HubChip", "Path", "ProductId", "Topology", "get_real_topology"]
 
-from .pyhubctl import (
+from .usbhubctl import (
     Hub,
     HubChip,
     Path,

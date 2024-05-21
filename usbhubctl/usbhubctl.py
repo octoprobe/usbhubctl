@@ -26,7 +26,8 @@ Example: '05E3:0626 1-3.4.5'
 
 class BackendPowerABC(abc.ABC):
     @abc.abstractmethod
-    def power(self, full_path: "Path", on: bool) -> None: ...
+    def power(self, full_path: "Path", on: bool) -> None:
+        ...
 
 
 @dataclasses.dataclass(frozen=True, repr=True, eq=True)
@@ -373,7 +374,7 @@ class Hub:
     ) -> ConnectedHubs:
         assert isinstance(actual_usb_topology, type(None) | Topology)
         if actual_usb_topology is None:
-            from pyhubctl import backend_query_lsusb
+            from usbhubctl import backend_query_lsusb
 
             actual_usb_topology = backend_query_lsusb.lsubs()
 

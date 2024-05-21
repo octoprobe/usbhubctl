@@ -2,7 +2,7 @@
 Specify the topology of a Hub
 """
 
-from pyhubctl import Hub, HubChip
+from usbhubctl import Hub, HubChip
 
 rsh_a16 = Hub(
     manufacturer="RSHTECH",

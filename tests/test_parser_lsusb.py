@@ -1,4 +1,4 @@
-from pyhubctl import get_real_topology, Topology
+from usbhubctl import get_real_topology, Topology
 
 LSUSB_OUTPUT_RSH_A16 = """
 /:  Bus 001.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/1p, 480M

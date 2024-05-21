@@ -6,7 +6,7 @@ import itertools
 import re
 from collections.abc import Iterator
 
-from pyhubctl import Path, ProductId, Topology
+from usbhubctl import Path, ProductId, Topology
 
 RE_BUS1 = re.compile(
     r"^/:  Bus (?P<bus>\d+).Port (?P<port>\d+): Dev \d+, Class=root_hub,"

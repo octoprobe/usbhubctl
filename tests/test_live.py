@@ -4,9 +4,9 @@ Test live usb hubs
 
 import pytest
 
-from pyhubctl.backend_power_uhubctl import BackendPowerUhubctl
-from pyhubctl.known_hubs import rsh_a10, rsh_a16, rsh_a107, rsh_st07c
-from pyhubctl.util_logging import init_logging
+from usbhubctl.backend_power_uhubctl import BackendPowerUhubctl
+from usbhubctl.known_hubs import rsh_a10, rsh_a16, rsh_a107, rsh_st07c
+from usbhubctl.util_logging import init_logging
 
 
 @pytest.mark.live
