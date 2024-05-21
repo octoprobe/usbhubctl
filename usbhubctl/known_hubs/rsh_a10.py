@@ -2,7 +2,9 @@
 Specify the topology of a Hub
 """
 
-from usbhubctl import Hub, HubChip
+from usbhubctl import DualProductId, Hub, HubChip
+
+_PRODUCT = DualProductId.parse("0bda:0411-0bda:5411")
 
 rsh_a10 = Hub(
     manufacturer="RSHTECH",
@@ -10,12 +12,12 @@ rsh_a10 = Hub(
     comment="",
     plug_count=10,
     hub_chip=HubChip(
-        "0bda:5411",
+        _PRODUCT,
         plug_or_chip=[
             1,
             2,
-            HubChip("0bda:5411", plug_or_chip=[7, 8, 9, 10]),
-            HubChip("0bda:5411", plug_or_chip=[3, 4, 5, 6]),
+            HubChip(_PRODUCT, plug_or_chip=[7, 8, 9, 10]),
+            HubChip(_PRODUCT, plug_or_chip=[3, 4, 5, 6]),
         ],
     ),
 )

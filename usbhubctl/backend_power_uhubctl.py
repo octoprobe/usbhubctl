@@ -5,10 +5,14 @@ from .util_subprocess import subprocess_run
 
 
 class BackendPowerUhubctl(BackendPowerABC):
-    def power(self, full_path: "Path", on: bool) -> None:
+    def power(self, full_paths: list["Path"], on: bool) -> None:
         """
         uhubctl -l 3-6.1 -p 1 --action on
         """
+        # TODO: This is too much simplified!
+        assert len(full_paths) == 1
+        full_path = full_paths[0]
+
         action = "on" if on else "off"
         args = [
             "uhubctl",
