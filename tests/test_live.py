@@ -5,7 +5,7 @@ Test live usb hubs
 import pytest
 
 from usbhubctl import DualConnectedHub, DualConnectedHubs
-from usbhubctl.known_hubs import rsh_a10, rsh_a16, rsh_a107, rsh_st07c
+from usbhubctl.known_hubs import octohub4, rsh_a10, rsh_a16, rsh_a107, rsh_st07c
 from usbhubctl.util_logging import init_logging
 
 
@@ -14,6 +14,17 @@ def get_one_or_skip(connected_hubs: DualConnectedHubs) -> DualConnectedHub:
         return connected_hubs.get_one()
     except Exception as e:
         pytest.skip(msg=f"Could not connect to '{connected_hubs.hub}': {e}")
+
+
+@pytest.mark.live
+def test_toggle_octohub4() -> None:
+    connected_hubs = octohub4.find_connected_dualhubs()
+
+    connected_hub = get_one_or_skip(connected_hubs)
+    for plug in connected_hub.connected_plugs:
+        plug.power(on=True)
+    for plug in connected_hub.connected_plugs:
+        plug.power(on=False)
 
 
 @pytest.mark.live
@@ -74,9 +85,9 @@ def test_toggle_rsh_a107() -> None:
 if __name__ == "__main__":
     init_logging()
 
+    test_toggle_octohub4()
     # test_toggle_rsh_a10()
     # test_toggle_rsh_a107()
-    test_toggle_rsh_st07c()
 
 
 """

@@ -5,7 +5,7 @@ import pytest
 from usbhubctl import Hub, Topology
 from usbhubctl.known_hubs import rsh_a10, rsh_a16
 
-_EFFECTIVE_TOPOLOGY_WITH_RSH_A10 = """
+_EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A = """
 05E3:0626 2-3
 0BDA:0411 2-3.3
 0BDA:0411 2-3.3.3
@@ -16,7 +16,20 @@ _EFFECTIVE_TOPOLOGY_WITH_RSH_A10 = """
 0BDA:5411 3-6.3.4
 """
 
-_EFFECTIVE_TOPOLOGY_WITH_RSH_A16 = """
+_EFFECTIVE_TOPOLOGY_WITH_RSH_A10_B = """
+1A40:0801 3-5
+2109:0812 3-5.2
+214B:7250 3-5.2.1
+0424:2514 3-5.2.2
+0BDA:5411 3-5.2.3
+0BDA:5411 3-5.2.3.3
+0BDA:5411 3-5.2.3.4
+"""
+"""
+Hub behind chip 7 port hub: USB2 chips (0BDA:0411) are missing. Why?
+"""
+
+_EFFECTIVE_TOPOLOGY_WITH_RSH_A16_A = """
 05E3:0626 1-3
 0BDA:0411 1-3.1
 0BDA:0411 1-3.1.3
@@ -37,26 +50,42 @@ class FindHubTestParam:
     hub: Hub
     is_usb2: bool
     effective_topology: str
+    effective_topology_label: str
     expected_connected_hub: str
 
     def __post_init__(self) -> None:
         assert isinstance(self.hub, Hub)
         assert isinstance(self.is_usb2, bool)
         assert isinstance(self.effective_topology, str)
+        assert isinstance(self.effective_topology_label, str)
         assert isinstance(self.expected_connected_hub, str)
 
     @property
     def testname(self) -> str:
-        return f"{self.hub.model}_{'usb2' if self.is_usb2 else 'usb3'}_{self.expected_connected_hub}"
+        return f"{self.hub.model}_{'usb2' if self.is_usb2 else 'usb3'}_{self.effective_topology_label}_{self.expected_connected_hub}"
 
 
 @pytest.mark.parametrize(
     "param",
     (
-        FindHubTestParam(rsh_a10, True, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10, "2-3.3"),
-        FindHubTestParam(rsh_a10, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10, "3-6.3"),
-        FindHubTestParam(rsh_a16, True, _EFFECTIVE_TOPOLOGY_WITH_RSH_A16, "1-3.1"),
-        FindHubTestParam(rsh_a16, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A16, "2-6.1"),
+        FindHubTestParam(
+            rsh_a10, True, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A, "a", "2-3.3"
+        ),
+        FindHubTestParam(
+            rsh_a10, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A, "a", "3-6.3"
+        ),
+        FindHubTestParam(
+            rsh_a10, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_B, "b", "3-5.2.3"
+        ),
+        FindHubTestParam(
+            rsh_a10, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_B, "b", "3-5.2.3"
+        ),
+        FindHubTestParam(
+            rsh_a16, True, _EFFECTIVE_TOPOLOGY_WITH_RSH_A16_A, "a", "1-3.1"
+        ),
+        FindHubTestParam(
+            rsh_a16, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A16_A, "a", "2-6.1"
+        ),
     ),
     ids=lambda param: param.testname,
 )

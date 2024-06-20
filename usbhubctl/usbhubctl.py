@@ -91,25 +91,30 @@ class ProductId:
 @dataclasses.dataclass(frozen=True, repr=True, eq=True)
 class DualProductId:
     usb2: ProductId
-    usb3: None | ProductId
+    usb3: ProductId
 
     def __post_init__(self) -> None:
         assert isinstance(self.usb2, ProductId)
-        assert isinstance(self.usb3, None | ProductId)
+        assert isinstance(self.usb3, ProductId)
 
     def get_product_id(self, is_usb2: bool) -> ProductId:
         return self.usb2 if is_usb2 else self.usb3
 
     @staticmethod
-    def parse(dual_product: str) -> "DualProductId":
+    def parse(dual_product: str) -> Union["ProductId", "DualProductId"]:
         """
-        Example 'dual_product': ""0bda:0411-0bda:5411"
+        Example 'dual_product': "0bda:0411-0bda:5411"
+        Left: usb2
+        Right: usb3
+        If only one: usb2
         """
-        _usb2, _usb3 = dual_product.split("-", 2)
-        usb3 = None if (_usb3 == "") else ProductId.parse(_usb3)
+        try:
+            usb2, usb3 = dual_product.split("-", 2)
+        except ValueError:
+            return ProductId.parse(dual_product)
         return DualProductId(
-            usb2=ProductId.parse(_usb2),
-            usb3=usb3,
+            usb2=ProductId.parse(usb2),
+            usb3=ProductId.parse(usb3),
         )
 
 
@@ -256,10 +261,12 @@ class ConnectedHub:
 @dataclasses.dataclass
 class ConnectedHubs:
     hub: "Hub"
+    is_usb2: bool
     hubs: list[ConnectedHub]
 
     def __post_init__(self) -> None:
         assert isinstance(self.hub, Hub)
+        assert isinstance(self.is_usb2, bool)
         assert isinstance(self.hubs, list)
 
     def assert_one(self) -> None:
@@ -271,8 +278,15 @@ class ConnectedHubs:
             return
 
     def get_one(self) -> ConnectedHub:
+        """
+        Raise IndexError
+        """
         self.assert_one()
-        return self.hubs[0]
+        try:
+            return self.hubs[0]
+        except IndexError as e:
+            usb_version = 2 if self.is_usb2 else 3
+            raise IndexError(f"No corresponing USB{usb_version} hub found!") from e
 
     @property
     def short(self) -> str:
@@ -418,11 +432,11 @@ class HubChip:
     a plug on the 'Hub'.
     """
 
-    product_id: None | DualProductId
+    product_id: None | ProductId | DualProductId
     plug_or_chip: list[Union[int, "HubChip"]]
 
     def __post_init__(self) -> None:
-        assert isinstance(self.product_id, None | DualProductId)
+        assert isinstance(self.product_id, None | ProductId | DualProductId)
         assert isinstance(self.plug_or_chip, list)
         for port in self.plug_or_chip:
             assert isinstance(port, int | HubChip)
@@ -438,6 +452,10 @@ class HubChip:
             plug_or_chip._register(hub, _path)
 
     def get_product_id(self, is_usb2: bool) -> ProductId:
+        if isinstance(self.product_id, ProductId):
+            return self.product_id
+
+        assert isinstance(self.product_id, DualProductId)
         return self.product_id.get_product_id(is_usb2=is_usb2)
 
 
@@ -539,6 +557,7 @@ class Hub:
 
         return ConnectedHubs(
             hub=self,
+            is_usb2=is_usb2,
             hubs=[
                 ConnectedHub(hub=self, root_path=path)
                 for path in self.get_topology(is_usb2=is_usb2).find_connected_hubs(
