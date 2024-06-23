@@ -16,10 +16,11 @@ Example: '/:  Bus 002.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/4p, 100
 """
 
 RE_PORT1 = re.compile(
-    r"^(?P<indent1> +\|__ )Port (?P<port>\d+).*?Class=(?P<class>.*?),"
+    r"^(?P<indent1> +\|__ )Port (?P<port>\d+)(.*?Class=(?P<class>.*?),)?"
 )
 """
 Example: '    |__ Port 003: Dev 002, If 0, Class=Hub, Driver=hub/4p, 5000M'
+         '    |__ Port 001: Dev 027, 12M'
 """
 
 RE_ID2 = re.compile(r"^(?P<indent2> +)ID (?P<vendor_product>\w\w\w\w:\w\w\w\w)")
@@ -53,7 +54,7 @@ def _parse(lsusb_output: str) -> Topology:
                 continue
 
             match1 = RE_PORT1.match(line1)
-            assert match1 is not None
+            assert match1 is not None, line1
             # Port
             indent1_len = len(match1.group("indent1"))
             port = int(match1.group("port"))

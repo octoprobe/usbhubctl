@@ -3,7 +3,7 @@ import dataclasses
 import pytest
 
 from usbhubctl import Hub, Topology
-from usbhubctl.known_hubs import rsh_a10, rsh_a16
+from usbhubctl.known_hubs import rsh_a10, rsh_a16, octohub4
 
 _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A = """
 05E3:0626 2-3
@@ -42,6 +42,15 @@ _EFFECTIVE_TOPOLOGY_WITH_RSH_A16_A = """
 0BDA:5411 2-6.1.3.3
 0BDA:5411 2-6.1.3.4
 0BDA:5411 2-6.1.4
+"""
+
+_EFFECTIVE_TOPOLOGY_WITH_OCTOHUB4 = """
+0424:2514 3-1
+1A40:0801 3-5
+0BDA:5411 3-5.2
+0BDA:5411 3-5.2.3
+0BDA:5411 3-5.2.4
+0A12:4010 3-5.2.4.3
 """
 
 
@@ -85,6 +94,9 @@ class FindHubTestParam:
         ),
         FindHubTestParam(
             rsh_a16, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A16_A, "a", "2-6.1"
+        ),
+        FindHubTestParam(
+            octohub4, False, _EFFECTIVE_TOPOLOGY_WITH_OCTOHUB4, "a", "3-1"
         ),
     ),
     ids=lambda param: param.testname,
