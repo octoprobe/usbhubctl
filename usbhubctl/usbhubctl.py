@@ -274,7 +274,7 @@ class ConnectedHubs:
             print(f"More than one '{self.hub.model}' hub detected: unambiguously")
             return
         if len(self.hubs) == 0:
-            print("No hub '{self.hub.model}' detected")
+            print(f"No hub '{self.hub.model}' detected")
             return
 
     def get_one(self) -> ConnectedHub:

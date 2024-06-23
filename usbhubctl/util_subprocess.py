@@ -1,4 +1,5 @@
 import logging
+import os
 import pathlib
 import subprocess
 import time
@@ -6,6 +7,27 @@ import time
 DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
 
 logger = logging.getLogger(__file__)
+
+
+def assert_root_and_s_bit(filename: pathlib.Path) -> None:
+    """
+    Assert the file belongs to root.
+    Assert that the setuid bit is set.
+    """
+    assert filename.is_file(), f"{filename} does not exist or is not a file!"
+
+    # Get file status
+    file_stat = os.stat(filename)
+
+    # Check if the file is owned by root (UID 0)
+    assert (
+        file_stat.st_uid == 0
+    ), f"{filename} is not owned by root! Call: sudo chown root:root {filename}"
+
+    # Check if the setuid bit is set (0o4000)
+    assert (
+        file_stat.st_mode & 0o4000
+    ), f"Setuid bit is not set on {filename}! Call: sudo chmod a+s {filename}"
 
 
 def subprocess_run(args: list[str], timeout_s: float = 10.0) -> str:
