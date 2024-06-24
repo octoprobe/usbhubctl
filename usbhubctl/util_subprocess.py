@@ -16,18 +16,19 @@ def assert_root_and_s_bit(filename: pathlib.Path) -> None:
     """
     assert filename.is_file(), f"{filename} does not exist or is not a file!"
 
-    # Get file status
     file_stat = os.stat(filename)
-
     # Check if the file is owned by root (UID 0)
-    assert (
-        file_stat.st_uid == 0
-    ), f"{filename} is not owned by root! Call: sudo chown root:root {filename}"
-
+    belongs_to_root = file_stat.st_uid == 0
     # Check if the setuid bit is set (0o4000)
-    assert (
-        file_stat.st_mode & 0o4000
-    ), f"Setuid bit is not set on {filename}! Call: sudo chmod a+s {filename}"
+    has_setuid_bit_set = file_stat.st_mode & 0o4000
+
+    success = has_setuid_bit_set and belongs_to_root
+    if success:
+        return
+
+    raise subprocess.SubprocessError(
+        f"{filename} must be owned by root and have the setuid bit set! Call:\nsudo chown root:root {filename}\nsudo chmod a+s {filename}"
+    )
 
 
 def subprocess_run(args: list[str], timeout_s: float = 10.0) -> str:
