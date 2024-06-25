@@ -1,18 +1,19 @@
 __version__ = "0.0.2"
 
 __all__ = [
+    "BackendPowerABC",
+    "ConnectedHub",
+    "ConnectedHubs",
+    "ConnectedPlug",
+    "DualConnectedHub",
+    "DualConnectedHubs",
+    "DualProductId",
+    "get_real_topology",
     "Hub",
     "HubChip",
     "Path",
     "ProductId",
-    "DualProductId",
-    "DualConnectedHub",
-    "DualConnectedHubs",
     "Topology",
-    "ConnectedHub",
-    "ConnectedHubs",
-    "ConnectedPlug",
-    "BackendPowerABC",
 ]
 
 from .usbhubctl import (

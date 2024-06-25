@@ -6,12 +6,13 @@ Sequence:
   Access hub using 'hub mount point'
 """
 
+from __future__ import annotations
+
 import abc
 import dataclasses
 import logging
 import re
 from collections.abc import Iterator
-from typing import Optional, Union
 
 logger = logging.getLogger(__file__)
 
@@ -22,12 +23,12 @@ logger = logging.getLogger(__file__)
 
 
 class BackendPower:
-    _backend_power: Optional["BackendPowerABC"] = None
+    _backend_power: BackendPowerABC | None = None
 
     @property
-    def backend_power(self) -> "BackendPowerABC":
+    def backend_power(self) -> BackendPowerABC:
         if self._backend_power is None:
-            from usbhubctl.backend_power_sysfs import BackendPowerSysFs
+            from .backend_power_sysfs import BackendPowerSysFs  # pylint: disable=C0415
 
             self._backend_power = BackendPowerSysFs()
         return self._backend_power
@@ -37,17 +38,18 @@ _BACKEND_POWER = BackendPower()
 
 
 class Cache:
-    _cache: Optional["Cache"] = None
+    _cache: Cache | None = None
 
-    def __init__(self):
-        self._actual_usb_topology = None
+    def __init__(self) -> None:
+        self._actual_usb_topology: Topology | None = None
 
     @property
-    def actual_usb_topology(self) -> "Topology":
+    def actual_usb_topology(self) -> Topology:
         if self._actual_usb_topology is None:
-            from usbhubctl import backend_query_lsusb
+            from usbhubctl import backend_query_lsusb  # pylint: disable=C0415
 
             self._actual_usb_topology = backend_query_lsusb.lsusb()
+
         return self._actual_usb_topology
 
 
@@ -63,7 +65,7 @@ Example: '05E3:0626 1-3.4.5'
 
 class BackendPowerABC(abc.ABC):
     @abc.abstractmethod
-    def power(self, full_paths: list["Path"], on: bool) -> None: ...
+    def power(self, full_paths: list[Path], on: bool) -> None: ...
 
 
 @dataclasses.dataclass(frozen=True, repr=True, eq=True)
@@ -80,7 +82,7 @@ class ProductId:
         return f"{self.vendor:04X}:{self.product:04X}"
 
     @staticmethod
-    def parse(product: str) -> "ProductId":
+    def parse(product: str) -> ProductId:
         """
         Example 'product': "0bda:5411"
         """
@@ -101,7 +103,7 @@ class DualProductId:
         return self.usb2 if is_usb2 else self.usb3
 
     @staticmethod
-    def parse(dual_product: str) -> Union["ProductId", "DualProductId"]:
+    def parse(dual_product: str) -> ProductId | DualProductId:
         """
         Example 'dual_product': "0bda:0411-0bda:5411"
         Left: usb2
@@ -139,12 +141,12 @@ class Path:
     def text(self) -> str:
         return f"{','.join(map(str,self.path))}-{self.product_id.text}"
 
-    def is_top_path(self, sub_path: "Path") -> bool:
+    def is_top_path(self, sub_path: Path) -> bool:
         assert isinstance(sub_path, Path)
         assert len(sub_path.path) == 0
         return self.product_id == sub_path.product_id
 
-    def equals(self, solution_path: "Path", path: "Path") -> bool:
+    def equals(self, solution_path: Path, path: Path) -> bool:
         assert isinstance(solution_path, Path)
         assert isinstance(path, Path)
         if self.product_id != path.product_id:
@@ -170,7 +172,7 @@ class Path:
         return f"{self.product_id.text} {self.short}"
 
     @staticmethod
-    def short_with_product_factory(line: str) -> "Path":
+    def short_with_product_factory(line: str) -> Path:
         """
         Example line: '05E3:0626 1-3'
         """
@@ -206,13 +208,8 @@ class Path:
 
 @dataclasses.dataclass
 class ConnectedPlug:
-    connected_hub: "ConnectedHub"
-    plug: "Plug"
-
-    def power(self, on: bool, backend_power: None | BackendPowerABC = None) -> None:
-        # logger.info(f"plug={self.plug.number} power on={on} {full_path}")
-        backend_power = _BACKEND_POWER.singleton()
-        backend_power.power(full_paths=[self.full_path], on=on)
+    connected_hub: ConnectedHub
+    plug: Plug
 
     @property
     def full_path(self) -> Path:
@@ -226,28 +223,27 @@ class ConnectedPlug:
 
 @dataclasses.dataclass
 class DualConnectedPlug:
-    connected_plug_usb2: "ConnectedPlug"
-    connected_plug_usb3: "ConnectedPlug"
+    connected_plug_usb2: ConnectedPlug
+    connected_plug_usb3: ConnectedPlug | None
 
     def __post_init__(self) -> None:
         assert isinstance(self.connected_plug_usb2, ConnectedPlug)
-        assert isinstance(self.connected_plug_usb3, ConnectedPlug)
+        assert isinstance(self.connected_plug_usb3, ConnectedPlug | None)
 
     def power(self, on: bool, backend_power: None | BackendPowerABC = None) -> None:
         # self.connected_plug_usb2.power(on=on, backend_power=backend_power)
         # self.connected_plug_usb3.power(on=on, backend_power=backend_power)
 
         backend_power = _BACKEND_POWER.backend_power
-        full_paths = [
-            self.connected_plug_usb2.full_path,
-            self.connected_plug_usb3.full_path,
-        ]
+        full_paths = [self.connected_plug_usb2.full_path]
+        if self.connected_plug_usb3 is not None:
+            full_paths.append(self.connected_plug_usb3.full_path)
         backend_power.power(full_paths=full_paths, on=on)
 
 
 @dataclasses.dataclass
 class ConnectedHub:
-    hub: "Hub"
+    hub: Hub
     root_path: Path
 
     @property
@@ -260,7 +256,7 @@ class ConnectedHub:
 
 @dataclasses.dataclass
 class ConnectedHubs:
-    hub: "Hub"
+    hub: Hub
     is_usb2: bool
     hubs: list[ConnectedHub]
 
@@ -295,58 +291,73 @@ class ConnectedHubs:
 
 @dataclasses.dataclass
 class DualConnectedHub:
-    hub: "Hub"
+    hub: Hub
     connected_hub_usb2: ConnectedHub
-    connected_hub_usb3: ConnectedHub
+    connected_hub_usb3: ConnectedHub | None
 
     def __post_init__(self) -> None:
         assert isinstance(self.connected_hub_usb2, ConnectedHub)
-        assert isinstance(self.connected_hub_usb3, ConnectedHub)
+        assert isinstance(self.connected_hub_usb3, ConnectedHub | None)
 
     @property
     def connected_plugs(self) -> list[DualConnectedPlug]:
         return [self.get_plug(plug_number=plug.number) for plug in self.hub.plugs]
 
     def get_plug(self, plug_number: int) -> DualConnectedPlug:
+        if self.connected_hub_usb3 is None:
+            connected_plug_usb3 = None
+        else:
+            connected_plug_usb3 = self.connected_hub_usb3.get_plug(
+                plug_number=plug_number
+            )
         return DualConnectedPlug(
             connected_plug_usb2=self.connected_hub_usb2.get_plug(
                 plug_number=plug_number
             ),
-            connected_plug_usb3=self.connected_hub_usb3.get_plug(
-                plug_number=plug_number
-            ),
+            connected_plug_usb3=connected_plug_usb3,
         )
 
 
 @dataclasses.dataclass
 class DualConnectedHubs:
-    hub: "Hub"
+    hub: Hub
     hubs_usb2: ConnectedHubs
-    hubs_usb3: ConnectedHubs
+    hubs_usb3: ConnectedHubs | None
 
     def __post_init__(self) -> None:
         assert isinstance(self.hub, Hub)
         assert isinstance(self.hubs_usb2, ConnectedHubs)
-        assert isinstance(self.hubs_usb3, ConnectedHubs)
+        assert isinstance(self.hubs_usb3, ConnectedHubs | None)
+
+    @property
+    def usb2_only(self) -> bool:
+        return self.hubs_usb3 is None
 
     def assert_one(self) -> None:
         self.hubs_usb2.assert_one()
+        if self.hubs_usb3 is None:
+            return
         self.hubs_usb3.assert_one()
 
     def get_one(self) -> DualConnectedHub:
+        """
+        Raise IndexError
+        """
+        if self.hubs_usb3 is None:
+            connected_hub_usb3 = None
+        else:
+            connected_hub_usb3 = self.hubs_usb3.get_one()
         return DualConnectedHub(
             hub=self.hub,
             connected_hub_usb2=self.hubs_usb2.get_one(),
-            connected_hub_usb3=self.hubs_usb3.get_one(),
+            connected_hub_usb3=connected_hub_usb3,
         )
 
     @property
     def short(self) -> str:
-        return "\n".join([hub.root_path.short for hub in self.hubs])
-
-    def assert_one(self) -> None:
-        self.hubs_usb2.assert_one()
-        self.hubs_usb3.assert_one()
+        if self.hubs_usb3 is None:
+            return f"USB2({self.hubs_usb2})"
+        return f"USB2/3({self.hubs_usb2}/{self.hubs_usb3})"
 
 
 @dataclasses.dataclass
@@ -357,13 +368,14 @@ class Topology:
         assert isinstance(self.list_path, list)
         self.list_path.sort(key=lambda path: (path.bus, path.path))
 
-    def find_connected_hubs(self, actual_usb_topology: "Topology") -> list[Path]:
+    def find_connected_hubs(self, actual_usb_topology: Topology) -> list[Path]:
         """
         'self' is the hub topology.
         'actual_usb_topology' is the usb topology connected to the PC.
         """
 
         def try_solution(i_candidate: int) -> None | Path:
+            solution_path = None
             for i, path in enumerate(self.list_path):
                 try:
                     candiate = actual_usb_topology.list_path[i_candidate + i]
@@ -375,6 +387,7 @@ class Topology:
                     solution_path = candiate
                     continue
 
+                assert solution_path is not None
                 if not candiate.equals(solution_path, path):
                     return None
 
@@ -390,7 +403,7 @@ class Topology:
         return list(iter_solution())
 
     @staticmethod
-    def short_with_product_factory(multiline: str) -> "Topology":
+    def short_with_product_factory(multiline: str) -> Topology:
         multiline = multiline.strip()
         list_path = [
             Path.short_with_product_factory(line) for line in multiline.splitlines()
@@ -433,7 +446,7 @@ class HubChip:
     """
 
     product_id: None | ProductId | DualProductId
-    plug_or_chip: list[Union[int, "HubChip"]]
+    plug_or_chip: list[int | HubChip]
 
     def __post_init__(self) -> None:
         assert isinstance(self.product_id, None | ProductId | DualProductId)
@@ -441,15 +454,19 @@ class HubChip:
         for port in self.plug_or_chip:
             assert isinstance(port, int | HubChip)
 
-    def _register(self, hub: "Hub", path: list[int]) -> None:
+    def _register(self, hub: Hub, path: list[int]) -> None:
         for port_number0, plug_or_chip in enumerate(self.plug_or_chip):
             _path = path + [port_number0 + 1]
             if isinstance(plug_or_chip, int):
-                hub._register_plug(Plug(number=plug_or_chip, internal_path=_path))
+                hub._register_plug(Plug(number=plug_or_chip, internal_path=_path))  # pylint: disable=W0212
                 continue
 
             assert isinstance(plug_or_chip, HubChip)
-            plug_or_chip._register(hub, _path)
+            plug_or_chip._register(hub, _path)  # pylint: disable=W0212
+
+    @property
+    def usb2_only(self) -> bool:
+        return isinstance(self.product_id, ProductId)
 
     def get_product_id(self, is_usb2: bool) -> ProductId:
         if isinstance(self.product_id, ProductId):
@@ -494,7 +511,7 @@ class Hub:
         assert isinstance(self.plug_count, int)
         assert isinstance(self.hub_chip, HubChip)
 
-        self.hub_chip._register(self, path=[])
+        self.hub_chip._register(self, path=[])  # pylint: disable=W0212
 
         sorted_ports = sorted(self._dict_plugs.keys())
         if len(sorted_ports) != self.plug_count:
@@ -515,6 +532,10 @@ class Hub:
             for plug_number in sorted(self._dict_plugs.keys())
         ]
 
+    @property
+    def usb2_only(self) -> bool:
+        return self.hub_chip.usb2_only
+
     def _register_plug(self, plug: Plug) -> None:
         assert plug.number not in self._dict_plugs
         self._dict_plugs[plug.number] = plug
@@ -525,7 +546,7 @@ class Hub:
     def get_topology(self, is_usb2: bool) -> Topology:
         list_internal_path: list[Path] = []
 
-        def downstream(hub_chip: "HubChip", path: list[int]) -> None:
+        def downstream(hub_chip: HubChip, path: list[int]) -> None:
             assert hub_chip.product_id is not None
 
             list_internal_path.append(
@@ -547,7 +568,7 @@ class Hub:
     def find_connected_hubs(
         self,
         is_usb2: bool,
-        actual_usb_topology: Optional["Topology"] = None,
+        actual_usb_topology: Topology | None = None,
     ) -> ConnectedHubs:
         assert isinstance(actual_usb_topology, None | Topology)
         assert isinstance(is_usb2, bool)
@@ -568,23 +589,22 @@ class Hub:
 
     def find_connected_dualhubs(
         self,
-        actual_usb_topology: Optional["Topology"] = None,
+        actual_usb_topology: Topology | None = None,
     ) -> DualConnectedHubs:
+        if self.usb2_only:
+            hubs_usb3 = None
+        else:
+            hubs_usb3 = self.find_connected_hubs(
+                is_usb2=False, actual_usb_topology=actual_usb_topology
+            )
+
         return DualConnectedHubs(
             hub=self,
             hubs_usb2=self.find_connected_hubs(
                 is_usb2=True, actual_usb_topology=actual_usb_topology
             ),
-            hubs_usb3=self.find_connected_hubs(
-                is_usb2=False, actual_usb_topology=actual_usb_topology
-            ),
+            hubs_usb3=hubs_usb3,
         )
-
-    def rotate_toggle(self, root_path: Path) -> None:
-        for plug_number in sorted(self._dict_plugs.keys()):
-            plug = self._dict_plugs[plug_number]
-            full_path = plug.extend(root_path=root_path)
-            print(full_path)
 
     def __repr__(self) -> str:
         return f"USB Hub '{self.model}' with {self.plug_count} plugs"

@@ -6,10 +6,10 @@ https://github.com/pyusb/pyusb/blob/master/docs/tutorial.rst
 import dataclasses
 import time
 
-import usb.core
-import usb.util
 import usb.control
+import usb.core
 import usb.legacy
+import usb.util
 
 
 class FindUsbClass:

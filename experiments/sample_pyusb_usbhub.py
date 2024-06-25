@@ -2,8 +2,9 @@
 https://en.wikipedia.org/wiki/USB
 https://github.com/pyusb/pyusb/blob/master/docs/tutorial.rst
 """
+
 import time
-from typing import Dict, List
+
 import usb.core
 import usb.util
 from usb.legacy import CLASS_HUB
@@ -67,10 +68,10 @@ class find_class:
 
 
 class Universe:
-    def __init__(self):
-        self.busses: Dict[int, usb.Bus] = {}
+    def __init__(self) -> None:
+        self.busses: dict[int, usb.Bus] = {}
 
-    def populate(self, hub_devices: List[usb.Device]) -> bool:
+    def populate(self, hub_devices: list[usb.Device]) -> bool:
         """
         Try to build the tree from the busses, root_hubs, etc.
         return False if no elements could be added.
@@ -93,8 +94,8 @@ class Universe:
 class Bus:
     def __init__(self, nr: int):
         self.nr = nr
-        self.root_hub: "Hub" = None
-        self.hubs: Dict[str:"Hub"] = {}
+        self.root_hub: Hub = None
+        self.hubs: dict[str:Hub] = {}
 
     def add_hub_(self, hub: "Hub") -> None:
         assert hub.repr_hub_device not in self.hubs
@@ -134,8 +135,8 @@ class Hub:
         self.bus = bus
         self.hub_device = hub_device
         self.repr_hub_device = repr(hub_device)
-        self.children: Dict[str:Hub] = {}
-        self.port_child: Dict[int:Hub] = {}
+        self.children: dict[str:Hub] = {}
+        self.port_child: dict[int:Hub] = {}
 
         bus.add_hub_(self)
 
@@ -162,7 +163,7 @@ class Hub:
         return True
 
     @property
-    def children_sorted(self) -> List["Hub"]:
+    def children_sorted(self) -> list[Hub]:
         return self.children.values()
 
     def print_tree(self, indent: str) -> None:
@@ -173,7 +174,7 @@ class Hub:
             child.print_tree(indent + "  ")
 
 
-def main():
+def main() -> None:
     begin_s = time.monotonic()
 
     hub_devices = usb.core.find(find_all=1, custom_match=find_class(CLASS_HUB))

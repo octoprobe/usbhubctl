@@ -5,11 +5,10 @@ https://github.com/pyusb/pyusb/blob/master/docs/tutorial.rst
 
 import dataclasses
 import time
-from typing import Dict, List
+
 import usb.core
 import usb.util
 from usb.legacy import CLASS_HUB
-
 
 """
 Hub(vendor=8523, product=29264, bus=3, path=(5, 2, 1), address=9)
@@ -20,11 +19,11 @@ lsusb -tv
 /:  Bus 003.Port 001: Dev 001, Class=root_hub, Driver=xhci_hcd/12p, 480M
     ID 1d6b:0002 Linux Foundation 2.0 root hub
     |__ Port 005: Dev 004, If 0, Class=Hub, Driver=hub/4p, 480M
-        ID 1a40:0801 Terminus Technology Inc. 
+        ID 1a40:0801 Terminus Technology Inc.
         |__ Port 002: Dev 006, If 0, Class=Hub, Driver=hub/4p, 480M
             ID 2109:0812 VIA Labs, Inc. VL812 Hub
             |__ Port 001: Dev 009, If 0, Class=Hub, Driver=hub/4p, 480M
-                ID 214b:7250 Huasheng Electronics 
+                ID 214b:7250 Huasheng Electronics
 
 ls -1 /sys/bus/usb/devices
 3-5
@@ -75,7 +74,7 @@ class Hub:
     vendor: int
     product: int
     bus: int
-    path: List[int]
+    path: list[int]
     address: int
 
     @property
@@ -89,7 +88,7 @@ def main():
     hub_devices = usb.core.find(find_all=1, custom_match=find_class(CLASS_HUB))
     hub_devices = list(hub_devices)
 
-    hubs: List[Hub] = []
+    hubs: list[Hub] = []
     for hub in hub_devices:
         # print(f"  port_number={hub.port_number}({hub.port_numbers})")
         # print(hub)

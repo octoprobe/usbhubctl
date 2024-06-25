@@ -150,7 +150,6 @@ section-order = [
   "third-party",
   "first-party",
   "local-folder",
-  "testing"
 ]
 
 [tool.ruff.lint.pyupgrade]
@@ -162,5 +161,18 @@ disable = '''
     missing-module-docstring,
     missing-class-docstring,
     missing-function-docstring,
-    logging-fstring-interpolation
+    logging-fstring-interpolation,
+    too-few-public-methods,
+    too-many-return-statements,
+    too-many-branches,
+    too-many-arguments,
+    too-many-instance-attributes,
+    unreachable,
+    line-too-long,
 '''
+
+[tool.pylint]
+max-line-length = 88
+disable = [
+    "R0801", # Similar lines in 2 files
+]

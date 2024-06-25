@@ -2,6 +2,8 @@
 Test live usb hubs
 """
 
+import time
+
 import pytest
 
 from usbhubctl import DualConnectedHub, DualConnectedHubs
@@ -12,8 +14,9 @@ from usbhubctl.util_logging import init_logging
 def get_one_or_skip(connected_hubs: DualConnectedHubs) -> DualConnectedHub:
     try:
         return connected_hubs.get_one()
-    except Exception as e:
-        pytest.skip(msg=f"Could not connect to '{connected_hubs.hub}': {e}")
+    except IndexError as e:
+        pytest.skip(reason=f"Could not connect to '{connected_hubs.hub.model}': {e}")
+        raise NotImplementedError() from e
 
 
 @pytest.mark.live
@@ -85,37 +88,10 @@ def test_toggle_rsh_a107() -> None:
 if __name__ == "__main__":
     init_logging()
 
+    begin_s = time.monotonic()
+
     test_toggle_octohub4()
     # test_toggle_rsh_a10()
     # test_toggle_rsh_a107()
 
-
-"""
-/sys/devices/pci0000:00/0000:00:14.0/usb3/3-6/3-6.1/power
-echo on > control
-
-
-/sys/devices/pci0000:00/0000:00:14.0/usb3/3-6/3-6.1/3-6.1:1.0/3-6.1-port1/power
-
-/sys/devices/pci0000:00/0000:00:14.0/usb3/3-6/3-6.1/3-6.1:1.0/3-6.1-port1/disable
-  echo 1 / 0
-  ==> Only works after 'uhubctl -l 3-6.1 -p 1 --action on'
-
-uhubctl -l 3-6.1 -p 1 --action on
-
-
-------------------------
-cd /sys/bus/usb/devices/3-6.1:1.0
-cd 3-6.1-port1
-
-=========usb2
-
-cd /sys/bus/usb/devices/2-3.1:1.0
-cd 2-3.1-port1
-echo 1 > disable
-
-=====================
-echo 1 > /sys/bus/usb/devices/2-3.1:1.0/2-3.1-port1/disable
-echo 1 > /sys/bus/usb/devices/3-6.1:1.0/3-6.1-port1/disable
-
-"""
+    print(f"Duration {time.monotonic()-begin_s:0.3f}s")

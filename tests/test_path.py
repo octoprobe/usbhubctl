@@ -3,7 +3,7 @@ import dataclasses
 import pytest
 
 from usbhubctl import Hub, Topology
-from usbhubctl.known_hubs import rsh_a10, rsh_a16, octohub4
+from usbhubctl.known_hubs import octohub4, rsh_a10, rsh_a16
 
 _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A = """
 05E3:0626 2-3
@@ -199,4 +199,4 @@ def test_plug_rsh_a16(
 
 
 if __name__ == "__main__":
-    test_find_rsh_a16()
+    pass
