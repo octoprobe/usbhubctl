@@ -250,6 +250,10 @@ class ConnectedHub:
     def connected_plugs(self) -> list[ConnectedPlug]:
         return [ConnectedPlug(connected_hub=self, plug=plug) for plug in self.hub.plugs]
 
+    @property
+    def path_short(self) -> str:
+        return self.root_path.short
+
     def get_plug(self, plug_number: int) -> ConnectedPlug:
         return ConnectedPlug(connected_hub=self, plug=self.hub.get_plug(plug_number))
 
@@ -267,13 +271,17 @@ class ConnectedHubs:
 
     def assert_one(self) -> None:
         if len(self.hubs) > 1:
-            print(f"More than one '{self.hub.model}' hub detected: unambiguously")
+            paths = "/".join(h.path_short for h in self.hubs)
+            usb_version = 2 if self.is_usb2 else 3
+            raise IndexError(
+                f"More than one '{self.hub.model}' USB{usb_version} hubs detected: Paths {paths}: unambiguously"
+            )
             return
         if len(self.hubs) == 0:
             print(f"No hub '{self.hub.model}' detected")
             return
 
-    def get_one(self) -> ConnectedHub:
+    def expect_one(self) -> ConnectedHub:
         """
         Raise IndexError
         """
@@ -286,7 +294,7 @@ class ConnectedHubs:
 
     @property
     def short(self) -> str:
-        return "\n".join([hub.root_path.short for hub in self.hubs])
+        return "/".join([hub.root_path.short for hub in self.hubs])
 
 
 @dataclasses.dataclass
@@ -339,17 +347,22 @@ class DualConnectedHubs:
             return
         self.hubs_usb3.assert_one()
 
-    def get_one(self) -> DualConnectedHub:
+    def expect_one(self) -> DualConnectedHub:
         """
         Raise IndexError
         """
+        connected_hub_usb2 = self.hubs_usb2.expect_one()
         if self.hubs_usb3 is None:
             connected_hub_usb3 = None
         else:
-            connected_hub_usb3 = self.hubs_usb3.get_one()
+            connected_hub_usb3 = self.hubs_usb3.expect_one()
+
+        # TODO: Collect all USB2/USB3 hubs
+        # If count equals: return matching pairs
+        # If count differs: ???
         return DualConnectedHub(
             hub=self.hub,
-            connected_hub_usb2=self.hubs_usb2.get_one(),
+            connected_hub_usb2=connected_hub_usb2,
             connected_hub_usb3=connected_hub_usb3,
         )
 

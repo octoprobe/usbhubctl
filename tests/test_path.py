@@ -53,6 +53,18 @@ _EFFECTIVE_TOPOLOGY_WITH_OCTOHUB4 = """
 0A12:4010 3-5.2.4.3
 """
 
+_EFFECTIVE_TOPOLOGY_WITH_TWO_OCTOHUB4 = """
+0BDA:5411 3-1
+0BDA:5411 3-1.3
+0BDA:5411 3-1.4
+1A40:0801 3-5
+0424:2514 3-5.2
+0424:2514 3-5.3
+0BDA:0411 4-1
+0BDA:0411 4-1.3
+0BDA:0411 4-1.4
+"""
+
 
 @dataclasses.dataclass(frozen=True)
 class FindHubTestParam:
@@ -97,6 +109,13 @@ class FindHubTestParam:
         ),
         FindHubTestParam(
             octohub4, False, _EFFECTIVE_TOPOLOGY_WITH_OCTOHUB4, "a", "3-1"
+        ),
+        FindHubTestParam(
+            octohub4,
+            False,
+            _EFFECTIVE_TOPOLOGY_WITH_TWO_OCTOHUB4,
+            "two_a",
+            "3-5.2/3-5.3",
         ),
     ),
     ids=lambda param: param.testname,
