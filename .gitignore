@@ -29,3 +29,5 @@ archive.zip
 # macOS
 .DS_Store
 usbhubctl_sysfs/pyhubctl_sysfs
+.coverage*
+lcov.info

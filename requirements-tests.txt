@@ -1,5 +1,6 @@
 # -e .
 pytest 
-coverage[toml] >= 6.5.0
+pytest-cov
+coverage[toml]
 mypy 
-ruff 
+ruff

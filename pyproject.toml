@@ -67,7 +67,13 @@ addopts = [
   "--strict-config",
   "--strict-markers",
   "--ignore=docs",
+  # https://jasonstitt.com/perfect-python-live-test-coverage
+  "--cov",
+  "--cov-report=lcov:lcov.info",
+  "--cov-report=term"
+  # "--cov-report=xml:cov.xml"
 ]
+
 markers = [
     "live: Test on real usb hubs",
 ]

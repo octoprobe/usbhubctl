@@ -58,6 +58,11 @@
 				"request": "launch",
 				"module": "pytest",
 				"cwd": "${workspaceFolder}",
+				"args": [
+					"--cov",
+					"--cov-report=lcov:lcov.info",
+					"--cov-report=term"
+				],
 				"console": "integratedTerminal",
 				"env": {
 					"PYTHONPATH": "${workspaceFolder}",
@@ -75,11 +80,22 @@
 		// "ruff.fixAll": true,
 		// "ruff.lint.enable": true,
 		"ruff.lint.run": "onSave",
-		"mpremote.srcSubdirectory": "src"
+		"mpremote.srcSubdirectory": "src",
+		"python.testing.pytestArgs": [
+			"tests"
+		],
+		"python.testing.unittestEnabled": false,
+		"python.testing.pytestEnabled": true
 	},
 	"extensions": {
 		"recommendations": [
-			"charliermarsh.ruff"
+			"charliermarsh.ruff",
+			"ms-python.black-formatter",
+			"ms-python.isort",
+			"ms-python.mypy-type-checker",
+			"ms-python.pylint",
+			"ms-python.python",
+			"ryanluker.vscode-coverage-gutters",
 		]
 	}
 }
