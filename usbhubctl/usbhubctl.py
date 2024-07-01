@@ -78,7 +78,7 @@ class ProductId:
         assert isinstance(self.product, int)
 
     @property
-    def text(self) -> str:
+    def compact(self) -> str:
         return f"{self.vendor:04X}:{self.product:04X}"
 
     @staticmethod
@@ -101,6 +101,10 @@ class DualProductId:
 
     def get_product_id(self, is_usb2: bool) -> ProductId:
         return self.usb2 if is_usb2 else self.usb3
+
+    @property
+    def compact(self) -> str:
+        return f"{self.usb2.compact}-{self.usb3.compact}"
 
     @staticmethod
     def parse(dual_product: str) -> ProductId | DualProductId:
@@ -139,7 +143,7 @@ class Path:
 
     @property
     def text(self) -> str:
-        return f"{','.join(map(str,self.path))}-{self.product_id.text}"
+        return f"{','.join(map(str,self.path))}-{self.product_id.compact}"
 
     def is_top_path(self, sub_path: Path) -> bool:
         assert isinstance(sub_path, Path)
@@ -169,7 +173,7 @@ class Path:
 
     @property
     def short_with_product(self) -> str:
-        return f"{self.product_id.text} {self.short}"
+        return f"{self.product_id.compact} {self.short}"
 
     @staticmethod
     def short_with_product_factory(line: str) -> Path:
@@ -281,20 +285,36 @@ class ConnectedHubs:
             print(f"No hub '{self.hub.model}' detected")
             return
 
-    def expect_one(self) -> ConnectedHub:
-        """
-        Raise IndexError
-        """
-        self.assert_one()
-        try:
-            return self.hubs[0]
-        except IndexError as e:
-            usb_version = 2 if self.is_usb2 else 3
-            raise IndexError(f"No corresponing USB{usb_version} hub found!") from e
+    @property
+    def count(self) -> int:
+        return len(self.hubs)
 
     @property
-    def short(self) -> str:
+    def locations(self) -> str:
         return "/".join([hub.root_path.short for hub in self.hubs])
+
+    @property
+    def text_found(self) -> str:
+        usb_version = 2 if self.is_usb2 else 3
+        return f"{self.count} USB{usb_version}-hubs at {self.locations}"
+
+    # def expect_one(self) -> ConnectedHub:
+    #     """
+    #     Raise IndexError
+    #     """
+    #     self.assert_one()
+    #     try:
+    #         return self.hubs[0]
+    #     except IndexError as e:
+    #         usb_version = 2 if self.is_usb2 else 3
+    #         raise IndexError(f"No corresponing USB{usb_version} hub found!") from e
+
+    @property
+    def model_vendor_product(self) -> str:
+        usb_version = 2 if self.is_usb2 else 3
+        product_id = self.hub.hub_chip.product_id
+        assert isinstance(product_id, ProductId)
+        return f"{self.hub.model}(USB{usb_version} {product_id.vendor}:{product_id.product})"
 
 
 @dataclasses.dataclass
@@ -347,27 +367,39 @@ class DualConnectedHubs:
             return
         self.hubs_usb3.assert_one()
 
+    @property
+    def text_hubs_found(self) -> str:
+        list_found = [self.hubs_usb2.text_found]
+        if self.hubs_usb3 is not None:
+            list_found.append(self.hubs_usb3.text_found)
+        return " / ".join(list_found)
+
     def expect_one(self) -> DualConnectedHub:
         """
         Raise IndexError
         """
-        connected_hub_usb2 = self.hubs_usb2.expect_one()
-        if self.hubs_usb3 is None:
-            connected_hub_usb3 = None
-        else:
-            connected_hub_usb3 = self.hubs_usb3.expect_one()
 
-        # TODO: Collect all USB2/USB3 hubs
-        # If count equals: return matching pairs
-        # If count differs: ???
+        success = self.hubs_usb2.count == 1
+        if self.hubs_usb3 is not None:
+            success &= self.hubs_usb3.count == 1
+        if not success:
+            raise IndexError(
+                f"Expect exactly 1 hub '{self.hub.model}({self.hub.hub_chip.product_id_compact})' but found {self.text_hubs_found}"
+            )
+
+        hubs_usb2 = self.hubs_usb2.hubs[0]
+        if self.hubs_usb3 is None:
+            hubs_usb3 = None
+        else:
+            hubs_usb3 = self.hubs_usb3.hubs[0]
         return DualConnectedHub(
             hub=self.hub,
-            connected_hub_usb2=connected_hub_usb2,
-            connected_hub_usb3=connected_hub_usb3,
+            connected_hub_usb2=hubs_usb2,
+            connected_hub_usb3=hubs_usb3,
         )
 
     @property
-    def short(self) -> str:
+    def compact(self) -> str:
         if self.hubs_usb3 is None:
             return f"USB2({self.hubs_usb2})"
         return f"USB2/3({self.hubs_usb2}/{self.hubs_usb3})"
@@ -480,6 +512,14 @@ class HubChip:
     @property
     def usb2_only(self) -> bool:
         return isinstance(self.product_id, ProductId)
+
+    @property
+    def product_id_compact(self) -> str:
+        if isinstance(self.product_id, ProductId):
+            return self.product_id.compact
+
+        assert isinstance(self.product_id, DualProductId)
+        return self.product_id.compact
 
     def get_product_id(self, is_usb2: bool) -> ProductId:
         if isinstance(self.product_id, ProductId):

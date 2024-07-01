@@ -6,7 +6,7 @@ from usbhubctl import Hub, HubChip, ProductId
 
 octohub4 = Hub(
     manufacturer="Maerki Informatik",
-    model="Octohub v0.2",
+    model="Octohub4 v0.2",
     comment="",
     plug_count=4,
     hub_chip=HubChip(

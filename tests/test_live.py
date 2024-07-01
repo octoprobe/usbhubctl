@@ -15,7 +15,7 @@ def get_one_or_skip(connected_hubs: DualConnectedHubs) -> DualConnectedHub:
     try:
         return connected_hubs.expect_one()
     except IndexError as e:
-        pytest.skip(reason=f"Could not connect to '{connected_hubs.hub.model}': {e}")
+        pytest.skip(reason=f"Could not connect to hub: {e}")
         raise NotImplementedError() from e
 
 

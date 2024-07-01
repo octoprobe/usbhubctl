@@ -127,7 +127,7 @@ def test_find_hub(param: FindHubTestParam) -> None:
         actual_usb_topology=effective_topology,
     )
 
-    assert connected_hubs.short == param.expected_connected_hub
+    assert connected_hubs.locations == param.expected_connected_hub
 
 
 _EXPECTED_SHORT_WITH_PRODUCT_RSH_A10_USB2 = """
