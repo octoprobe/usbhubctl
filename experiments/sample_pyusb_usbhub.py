@@ -3,6 +3,8 @@ https://en.wikipedia.org/wiki/USB
 https://github.com/pyusb/pyusb/blob/master/docs/tutorial.rst
 """
 
+from __future__ import annotations
+
 import time
 
 import usb.core

@@ -14,6 +14,9 @@ import logging
 import re
 from collections.abc import Iterator
 
+import serial
+import usb
+
 logger = logging.getLogger(__file__)
 
 # from usbhubctl.backend_power_uhubctl import BackendPowerUhubctl
@@ -125,6 +128,62 @@ class DualProductId:
 
 
 @dataclasses.dataclass
+class Location:
+    bus: int
+    path: list[int]
+
+    @staticmethod
+    def factory(
+        device: serial.tools.list_ports_linux.SysFS | usb.core.Device,
+    ) -> Location:
+        """
+        Example location: '3-1.4.1.1:1.0'
+        This is returnemd from the 'location' property of the 'Device' object of the 'serial' library.
+        """
+        if isinstance(device, serial.tools.list_ports_linux.SysFS):
+            # This is a RP2 in application mode.
+            # Returned from package 'list_ports', method 'serial.list_ports'
+            location, _, _ = device.location.partition(":")
+            bus_str, _, path_str = location.partition("-")
+            bus = int(bus_str)
+            path = [int(p) for p in path_str.split(".")]
+            return Location(
+                bus=bus,
+                path=path,
+            )
+
+        if isinstance(device, usb.core.Device):
+            # This is a RP2 in boot mode.
+            # Returned from package 'usb', method 'usb.core.find()'
+            return Location(bus=device.bus, path=list(device.port_numbers))
+
+        assert False, f"Unknown type of {device}!"
+
+    def is_my_hub(self, hub_location: Location) -> bool:
+        """
+        Expected:
+          'this' is the location of the rp2 on the tentacle
+          'hub_location' is the location of the hub on the same tentacle
+        """
+        if self.bus != hub_location.bus:
+            return False
+        if self.path[:-1] == hub_location.path:
+            assert (
+                self.path[-1] == 1
+            ), f"The rp2 is always connected on port 1, but not {self.short}!"
+            return True
+        return False
+
+    def path_factory(self, product_id: ProductId) -> Path:
+        return Path(product_id=product_id, bus=self.bus, path=self.path)
+
+    @property
+    def short(self) -> str:
+        path = ".".join(map(str, self.path))
+        return f"{self.bus}-{path}"
+
+
+@dataclasses.dataclass
 class Path:
     """
     A USB hub chip and the downstream path leading to this chip.
@@ -200,6 +259,19 @@ class Path:
         """
         path = ".".join(map(str, self.path[:-1]))
         return f"{self.bus}-{path}"
+
+    @property
+    def location(self) -> Location:
+        """
+        Example:
+            4-1
+            4-1.4
+            4-1.3
+            4-1.3
+            4-1.3.4
+        """
+        assert self.bus is not None
+        return Location(bus=self.bus, path=self.path)
 
     @property
     def uhubctl_port(self) -> str:

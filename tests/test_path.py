@@ -2,8 +2,7 @@ import dataclasses
 
 import pytest
 
-from usbhubctl import Hub, Topology
-from usbhubctl.known_hubs import octohub4, rsh_a10, rsh_a16
+from usbhubctl import Hub, Topology, known_hubs
 
 _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A = """
 05E3:0626 2-3
@@ -90,28 +89,36 @@ class FindHubTestParam:
     "param",
     (
         FindHubTestParam(
-            rsh_a10, True, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A, "a", "2-3.3"
+            known_hubs.rsh_a10, True, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A, "a", "2-3.3"
         ),
         FindHubTestParam(
-            rsh_a10, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A, "a", "3-6.3"
+            known_hubs.rsh_a10, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_A, "a", "3-6.3"
         ),
         FindHubTestParam(
-            rsh_a10, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_B, "b", "3-5.2.3"
+            known_hubs.rsh_a10,
+            False,
+            _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_B,
+            "b",
+            "3-5.2.3",
         ),
         FindHubTestParam(
-            rsh_a10, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_B, "b", "3-5.2.3"
+            known_hubs.rsh_a10,
+            False,
+            _EFFECTIVE_TOPOLOGY_WITH_RSH_A10_B,
+            "b",
+            "3-5.2.3",
         ),
         FindHubTestParam(
-            rsh_a16, True, _EFFECTIVE_TOPOLOGY_WITH_RSH_A16_A, "a", "1-3.1"
+            known_hubs.rsh_a16, True, _EFFECTIVE_TOPOLOGY_WITH_RSH_A16_A, "a", "1-3.1"
         ),
         FindHubTestParam(
-            rsh_a16, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A16_A, "a", "2-6.1"
+            known_hubs.rsh_a16, False, _EFFECTIVE_TOPOLOGY_WITH_RSH_A16_A, "a", "2-6.1"
         ),
         FindHubTestParam(
-            octohub4, False, _EFFECTIVE_TOPOLOGY_WITH_OCTOHUB4, "a", "3-1"
+            known_hubs.octohub4, False, _EFFECTIVE_TOPOLOGY_WITH_OCTOHUB4, "a", "3-1"
         ),
         FindHubTestParam(
-            octohub4,
+            known_hubs.octohub4,
             False,
             _EFFECTIVE_TOPOLOGY_WITH_TWO_OCTOHUB4,
             "two_a",
@@ -178,10 +185,18 @@ class TopologyTestParam:
 @pytest.mark.parametrize(
     "param",
     (
-        TopologyTestParam(rsh_a10, True, _EXPECTED_SHORT_WITH_PRODUCT_RSH_A10_USB2),
-        TopologyTestParam(rsh_a10, False, _EXPECTED_SHORT_WITH_PRODUCT_RSH_A10_USB3),
-        TopologyTestParam(rsh_a16, True, _EXPECTED_SHORT_WITH_PRODUCT_RSH_A16_USB2),
-        TopologyTestParam(rsh_a16, False, _EXPECTED_SHORT_WITH_PRODUCT_RSH_A16_USB3),
+        TopologyTestParam(
+            known_hubs.rsh_a10, True, _EXPECTED_SHORT_WITH_PRODUCT_RSH_A10_USB2
+        ),
+        TopologyTestParam(
+            known_hubs.rsh_a10, False, _EXPECTED_SHORT_WITH_PRODUCT_RSH_A10_USB3
+        ),
+        TopologyTestParam(
+            known_hubs.rsh_a16, True, _EXPECTED_SHORT_WITH_PRODUCT_RSH_A16_USB2
+        ),
+        TopologyTestParam(
+            known_hubs.rsh_a16, False, _EXPECTED_SHORT_WITH_PRODUCT_RSH_A16_USB3
+        ),
     ),
     ids=lambda param: param.testname,
 )
@@ -213,7 +228,7 @@ def test_plug_rsh_a16(
     plug_number: int,
     expected_internal_path: list[int],
 ) -> None:
-    plug = rsh_a16.get_plug(plug_number=plug_number)
+    plug = known_hubs.rsh_a16.get_plug(plug_number=plug_number)
     assert plug.internal_path == expected_internal_path
 
 

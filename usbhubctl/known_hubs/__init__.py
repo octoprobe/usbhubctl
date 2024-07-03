@@ -1,4 +1,5 @@
 __all__ = [
+    "OCTOHUB4_PRODUCT_ID",
     "octohub4",
     "rsh_a10",
     "rsh_a107",
@@ -7,6 +8,7 @@ __all__ = [
 ]
 
 from .octohub4 import octohub4
+from .octohub4 import OCTOHUB4_PRODUCT_ID
 from .rsh_a10 import rsh_a10
 from .rsh_a107 import rsh_a107
 from .rsh_a16 import rsh_a16

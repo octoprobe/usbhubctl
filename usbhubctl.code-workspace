@@ -16,7 +16,8 @@
 				"console": "integratedTerminal",
 				"env": {
 					"PYTHONPATH": "${workspaceFolder}",
-				}
+				},
+				"justMyCode": false
 			},
 			{
 				"name": "Python Debugger: Current File with Arguments",
@@ -28,7 +29,8 @@
 				"env": {
 					"PYTHONPATH": "${workspaceFolder}",
 				},
-				"args": "${command:pickArgs}"
+				"args": "${command:pickArgs}",
+				"justMyCode": false
 			},
 			{
 				"name": "test_path",
@@ -40,6 +42,7 @@
 				"env": {
 					"PYTHONPATH": "${workspaceFolder}",
 				},
+				"justMyCode": false
 			},
 			{
 				"name": "test_live",
@@ -51,6 +54,7 @@
 				"env": {
 					"PYTHONPATH": "${workspaceFolder}",
 				},
+				"justMyCode": false
 			},
 			{
 				"name": "pytest",
@@ -67,6 +71,7 @@
 				"env": {
 					"PYTHONPATH": "${workspaceFolder}",
 				},
+				"justMyCode": false
 			}
 		],
 		"compounds": []

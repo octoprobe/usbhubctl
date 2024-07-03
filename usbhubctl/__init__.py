@@ -11,6 +11,7 @@ __all__ = [
     "get_real_topology",
     "Hub",
     "HubChip",
+    "Location",
     "Path",
     "ProductId",
     "Topology",
@@ -19,6 +20,7 @@ __all__ = [
 from .usbhubctl import (
     Hub,
     HubChip,
+    Location,
     Path,
     ProductId,
     DualConnectedHub,
