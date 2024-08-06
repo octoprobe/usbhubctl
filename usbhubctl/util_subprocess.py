@@ -44,7 +44,7 @@ def subprocess_run(args: list[str], timeout_s: float = 10.0) -> str:
         timeout=timeout_s,
     )
 
-    logger.info(
+    logger.debug(
         f"EXEC {args_text}: returncode={proc.returncode}, duration={time.monotonic()-begin_s:0.3f}s"
     )
     logger.debug(f"  stdout: {proc.stdout}")
