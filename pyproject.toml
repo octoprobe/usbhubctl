@@ -26,6 +26,7 @@ classifiers = [
     "License :: OSI Approved :: MIT License",
 ]
 dependencies = [
+    "pyusb",
 ]
 
 [project.urls]
