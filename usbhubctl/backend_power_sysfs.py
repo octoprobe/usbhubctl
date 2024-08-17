@@ -1,5 +1,11 @@
+import logging
+
 from .usbhubctl import BackendPowerABC, Path
 from .util_subprocess import subprocess_run
+
+logger = logging.getLogger(__file__)
+
+FILENAME_USBHUBCTL_SYSFS = "usbhubctl_sysfs"
 
 
 class BackendPowerSysFs(BackendPowerABC):
@@ -13,9 +19,15 @@ class BackendPowerSysFs(BackendPowerABC):
 
         value = "0" if on else "1"
 
-        args = ["usbhubctl_sysfs"]
+        args = [FILENAME_USBHUBCTL_SYSFS]
         for full_path in full_paths:
             # path = f"/sys/bus/usb/devices/{full_path.uhubctl_location}:1.0/{full_path.uhubctl_location}-port{full_path.uhubctl_port}/disable"
             args.append(full_path.sysfs_path)
             args.append(value)
-        subprocess_run(args=args)
+
+        try:
+            subprocess_run(args=args)
+        except FileNotFoundError as e:
+            a = f"The binary '{FILENAME_USBHUBCTL_SYSFS}' was not found in the PATH."
+            b = "You have to compile and install it manually: https://github.com/octoprobe/usbhubctl/blob/main/usbhubctl_sysfs/README.md"
+            raise FileNotFoundError(f"{a}\n{b}") from e
