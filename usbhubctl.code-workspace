@@ -15,7 +15,7 @@
 				"cwd": "${workspaceFolder}",
 				"console": "integratedTerminal",
 				"env": {
-					"PYTHONPATH": "${workspaceFolder}",
+					"PYTHONPATH": "${workspaceFolder}/src",
 				},
 				"justMyCode": false
 			},
@@ -27,7 +27,7 @@
 				"cwd": "${workspaceFolder}",
 				"console": "integratedTerminal",
 				"env": {
-					"PYTHONPATH": "${workspaceFolder}",
+					"PYTHONPATH": "${workspaceFolder}/src",
 				},
 				"args": "${command:pickArgs}",
 				"justMyCode": false
@@ -40,7 +40,7 @@
 				"cwd": "${workspaceFolder}",
 				"console": "integratedTerminal",
 				"env": {
-					"PYTHONPATH": "${workspaceFolder}",
+					"PYTHONPATH": "${workspaceFolder}/src",
 				},
 				"justMyCode": false
 			},
@@ -52,7 +52,7 @@
 				"cwd": "${workspaceFolder}",
 				"console": "integratedTerminal",
 				"env": {
-					"PYTHONPATH": "${workspaceFolder}",
+					"PYTHONPATH": "${workspaceFolder}/src",
 				},
 				"justMyCode": false
 			},
@@ -69,7 +69,7 @@
 				],
 				"console": "integratedTerminal",
 				"env": {
-					"PYTHONPATH": "${workspaceFolder}",
+					"PYTHONPATH": "${workspaceFolder}/src",
 				},
 				"justMyCode": false
 			}

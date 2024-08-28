@@ -7,7 +7,7 @@ name = "usbhubctl"
 dynamic = ["version"]
 description = "Allows to switch power on usb hubs"
 readme = "README.md"
-requires-python = ">=3.8"
+requires-python = ">=3.12"
 authors = [
     { name = "Hans Märki", email = "buhtig.hans.maerki@ergoinfo.ch" },
 ]
@@ -43,7 +43,7 @@ all = [
 ]
 
 [tool.pdm]
-version = { source = "file", path = "usbhubctl/__init__.py" }
+version = { source = "file", path = "src/usbhubctl/__init__.py" }
 distribution = true
 
 [tool.pdm.build]
@@ -116,7 +116,7 @@ filterwarnings = [
 parallel = true
 source = [
     "tests",
-    "usbhubctl"
+    "src/usbhubctl"
 ]
 context = '${CONTEXT}'
 omit = [
@@ -127,7 +127,7 @@ omit = [
 [tool.ruff]
 target-version = "py312"
 # All paths are relative to the project root, which is the directory containing the pyproject.toml.
-src = ["usbhubctl", "tests"]
+src = ["src/usbhubctl", "tests"]
 
 [tool.ruff.lint]
 select = [
