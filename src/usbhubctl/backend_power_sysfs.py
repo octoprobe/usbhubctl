@@ -11,7 +11,7 @@ FILENAME_USBHUBCTL_SYSFS = "usbhubctl_sysfs"
 class BackendPowerSysFs(BackendPowerABC):
     def power(self, full_paths: list["Path"], on: bool) -> None:
         """
-        /usr/sbin/usbhubctl_sysfs /sys/bus/usb/devices/4-1:1.0/4-1-port1/disable 1
+        usbhubctl_sysfs /sys/bus/usb/devices/4-1:1.0/4-1-port1/disable 1
         """
         assert isinstance(full_paths, list)
         for full_path in full_paths:
