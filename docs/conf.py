@@ -53,7 +53,8 @@ intersphinx_mapping = {
     "micropython": ("https://docs.micropython.org/en/latest/", None),
     "octoprobe": ("http://docs.octoprobe.org/octoprobe/", None),
     "tentacle": ("http://docs.octoprobe.org/tentacle/", None),
-    "testbed_tutorial": ("http://docs.octoprobe.org/testbed_tutorial/", None),
+    "testbed_showcase": ("http://docs.octoprobe.org/testbed_showcase/", None),
+    "testbed_micropython": ("http://docs.octoprobe.org/testbed_micropython/", None),
     # "usbhubctl": ("http://docs.octoprobe.org/usbhubctl/", None),
 }
 sphinxmermaid_mermaid_init: dict[str, str | dict] = {
@@ -78,10 +79,13 @@ html_theme = "flask"
 html_static_path = ["_static"]
 html_context = {
     "project_links": [
-        ProjectLink("Octoprobe: Octoprobe", "https://www.octoprobe.org/octoprobe/"),
         ProjectLink("Octoprobe: Tentacle", "https://www.octoprobe.org/tentacle/"),
+        ProjectLink("Octoprobe: Octoprobe", "https://www.octoprobe.org/octoprobe/"),
         ProjectLink(
-            "Octoprobe: testbed_tutorial", "https://www.octoprobe.org/testbed_tutorial/"
+            "Octoprobe: testbed_showcase", "https://www.octoprobe.org/testbed_showcase/"
+        ),
+        ProjectLink(
+            "Octoprobe: testbed_micropython", "https://www.octoprobe.org/testbed_micropython/"
         ),
         # ProjectLink("Octoprobe: usbhubctl", "https://www.octoprobe.org/usbhubctl/"),
         # ProjectLink("Donate", "https://palletsprojects.com/donate"),
