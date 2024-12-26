@@ -52,17 +52,9 @@ class Octohubs:
     """
 
     def __init__(self) -> None:
-        def find_octohub4(device: usb.core.Device) -> bool:
-            if device.bDeviceClass == CLASS_HUB:
-                if device.idVendor == OCTOHUB4_PRODUCT_ID.vendor:
-                    if device.idProduct == OCTOHUB4_PRODUCT_ID.product:
-                        return True
-            return False
-
-        devices_octohub4 = usb.core.find(find_all=1, custom_match=find_octohub4)
         self._usb_paths = [
             Path(product_id=OCTOHUB4_PRODUCT_ID, bus=d.bus, path=d.port_numbers)
-            for d in devices_octohub4
+            for d in self.find_devices()
         ]
         """
         A list of USB usbhubctl.Path
@@ -74,6 +66,18 @@ class Octohubs:
         """
 
         self.hubs = [path_2_connected_hub(path) for path in self._usb_paths]
+
+    @staticmethod
+    def find_devices() -> list[usb.core.Device]:
+        def find_octohub4(device: usb.core.Device) -> bool:
+            if device.bDeviceClass == CLASS_HUB:
+                if device.idVendor == OCTOHUB4_PRODUCT_ID.vendor:
+                    if device.idProduct == OCTOHUB4_PRODUCT_ID.product:
+                        return True
+            return False
+
+        devices = usb.core.find(find_all=1, custom_match=find_octohub4)
+        return list(devices)
 
     def reset_power(self) -> None:
         """
