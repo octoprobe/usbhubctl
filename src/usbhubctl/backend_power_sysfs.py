@@ -1,4 +1,5 @@
 import logging
+import pathlib
 
 from .usbhubctl import BackendPowerABC, Path
 from .util_subprocess import subprocess_run
@@ -6,6 +7,8 @@ from .util_subprocess import subprocess_run
 logger = logging.getLogger(__file__)
 
 FILENAME_USBHUBCTL_SYSFS = "usbhubctl_sysfs"
+
+_DIRECT_WRITE = True
 
 
 class BackendPowerSysFs(BackendPowerABC):
@@ -18,6 +21,11 @@ class BackendPowerSysFs(BackendPowerABC):
             assert isinstance(full_path, Path)
 
         value = "0" if on else "1"
+
+        if _DIRECT_WRITE:
+            for full_path in full_paths:
+                pathlib.Path(full_path.sysfs_path).write_text(value)
+                return
 
         args = [FILENAME_USBHUBCTL_SYSFS]
         for full_path in full_paths:

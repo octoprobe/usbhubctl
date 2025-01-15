@@ -10,30 +10,6 @@ DIRECTORY_OF_THIS_FILE = pathlib.Path(__file__).parent
 logger = logging.getLogger(__file__)
 
 
-def assert_root_and_s_bit(program: str) -> pathlib.Path:
-    """
-    Assert the file belongs to root.
-    Assert that the setuid bit is set.
-    """
-    filename = pathlib.Path(shutil.which(program))
-
-    assert filename.is_file(), f"{filename} does not exist or is not a file!"
-
-    file_stat = os.stat(filename)
-    # Check if the file is owned by root (UID 0)
-    belongs_to_root = file_stat.st_uid == 0
-    # Check if the setuid bit is set (0o4000)
-    has_setuid_bit_set = file_stat.st_mode & 0o4000
-
-    success = has_setuid_bit_set and belongs_to_root
-    if success:
-        return filename
-
-    raise subprocess.SubprocessError(
-        f"{filename} must be owned by root and have the setuid bit set! Call:\nsudo chown root:root {filename}\nsudo chmod a+s {filename}"
-    )
-
-
 def subprocess_run(args: list[str], timeout_s: float = 10.0) -> str:
     args_text = " ".join(args)
 
