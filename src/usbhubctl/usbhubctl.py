@@ -68,7 +68,10 @@ Example: '05E3:0626 1-3.4.5'
 
 class BackendPowerABC(abc.ABC):
     @abc.abstractmethod
-    def power(self, full_paths: list[Path], on: bool) -> None: ...
+    def set_power(self, full_paths: list[Path], on: bool) -> None: ...
+
+    @abc.abstractmethod
+    def get_power(self, full_paths: list[Path]) -> bool: ...
 
 
 @dataclasses.dataclass(frozen=True, repr=True, eq=True)
@@ -157,7 +160,7 @@ class Location:
             # Returned from package 'usb', method 'usb.core.find()'
             return Location(bus=device.bus, path=list(device.port_numbers))
 
-        assert False, f"Unknown type of {device}!"
+        raise ValueError(f"Unknown type of {device}!")
 
     def is_my_hub(self, hub_location: Location) -> bool:
         """
@@ -306,7 +309,7 @@ class DualConnectedPlug:
         assert isinstance(self.connected_plug_usb2, ConnectedPlug)
         assert isinstance(self.connected_plug_usb3, ConnectedPlug | None)
 
-    def power(self, on: bool, backend_power: None | BackendPowerABC = None) -> None:
+    def set_power(self, on: bool, backend_power: None | BackendPowerABC = None) -> None:
         # self.connected_plug_usb2.power(on=on, backend_power=backend_power)
         # self.connected_plug_usb3.power(on=on, backend_power=backend_power)
 
@@ -314,7 +317,14 @@ class DualConnectedPlug:
         full_paths = [self.connected_plug_usb2.full_path]
         if self.connected_plug_usb3 is not None:
             full_paths.append(self.connected_plug_usb3.full_path)
-        backend_power.power(full_paths=full_paths, on=on)
+        backend_power.set_power(full_paths=full_paths, on=on)
+
+    def get_power(self, backend_power: None | BackendPowerABC = None) -> bool:
+        backend_power = _BACKEND_POWER.backend_power
+        full_paths = [self.connected_plug_usb2.full_path]
+        if self.connected_plug_usb3 is not None:
+            full_paths.append(self.connected_plug_usb3.full_path)
+        return backend_power.get_power(full_paths=full_paths)
 
 
 @dataclasses.dataclass

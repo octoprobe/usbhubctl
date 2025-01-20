@@ -5,7 +5,7 @@ from .util_subprocess import subprocess_run
 
 
 class BackendPowerUhubctl(BackendPowerABC):
-    def power(self, full_paths: list["Path"], on: bool) -> None:
+    def set_power(self, full_paths: list["Path"], on: bool) -> None:
         """
         uhubctl -l 3-6.1 -p 1 --action on
         """
@@ -23,3 +23,6 @@ class BackendPowerUhubctl(BackendPowerABC):
             f"--action={action}",
         ]
         subprocess_run(args=args)
+
+    def get_power(self, full_paths: list["Path"]) -> bool:
+        raise NotImplementedError()

@@ -1,0 +1,61 @@
+{
+    // See https://go.microsoft.com/fwlink/?LinkId=733558
+    // for the documentation about the tasks.json format
+    "version": "2.0.0",
+    "tasks": [
+        {
+            "label": "static check",
+            "type": "shell",
+            "command": "echo DONE",
+            "problemMatcher": [],
+            "dependsOn": [
+                "ruff",
+                "mypy",
+                "pylint",
+            ],
+            "group": {
+                "kind": "build",
+                "isDefault": true
+            }
+        },
+        {
+            "label": "ruff",
+            "type": "shell",
+            "command": "ruff check --config pyproject.toml --fix || true",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "mypy",
+            "type": "shell",
+            "command": "python -m mypy --config-file pyproject.toml src || true",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        },
+        {
+            "label": "pylint",
+            "type": "shell",
+            "command": "PYTHONPATH=${workspaceFolder} python -m pylint src || true",
+            "options": {
+                "cwd": "${workspaceFolder}"
+            },
+            "problemMatcher": [],
+            "group": {
+                "kind": "build",
+                "isDefault": false
+            }
+        }
+    ]
+}

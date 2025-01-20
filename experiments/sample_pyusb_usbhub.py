@@ -99,7 +99,7 @@ class Bus:
         self.root_hub: Hub = None
         self.hubs: dict[str:Hub] = {}
 
-    def add_hub_(self, hub: "Hub") -> None:
+    def add_hub_(self, hub: Hub) -> None:
         assert hub.repr_hub_device not in self.hubs
         self.hubs[repr(hub.hub_device)] = hub
 
@@ -142,7 +142,7 @@ class Hub:
 
         bus.add_hub_(self)
 
-    def _find_port(self, child_hub: "Hub") -> int:
+    def _find_port(self, child_hub: Hub) -> int:
         pass
 
     def populate(self, hub_device: usb.Device) -> bool:

@@ -25,9 +25,9 @@ def _test_toggle(hub: Hub) -> None:
 
     connected_hub = get_one_or_skip(connected_hubs)
     for plug in connected_hub.connected_plugs:
-        plug.power(on=True)
+        plug.set_power(on=True)
     for plug in connected_hub.connected_plugs:
-        plug.power(on=False)
+        plug.set_power(on=False)
 
 
 @pytest.mark.live

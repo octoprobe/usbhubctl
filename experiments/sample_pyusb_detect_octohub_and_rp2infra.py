@@ -1,3 +1,4 @@
+# type: ignore
 """
 https://en.wikipedia.org/wiki/USB
 https://github.com/pyusb/pyusb/blob/master/docs/tutorial.rst
@@ -10,7 +11,6 @@ Find all rp2 in programming mode (pyusb)
 
 from __future__ import annotations
 
-import time
 from typing import Any
 
 import serial
@@ -100,7 +100,7 @@ class find_rp2:
         return False
 
 
-def serial_ports_ordered() -> List[serial.Serial]:
+def serial_ports_ordered() -> list[serial.Serial]:
     """
     return ordered list of comports. Ignore the ones which do not have vid/pid defined.
     """
@@ -185,8 +185,6 @@ class QuerySerial:
 
 
 def main() -> None:
-    begin_s = time.monotonic()
-
     # rp2s = serial_find_rp2()
     # for rp2 in rp2s:
     #     print(rp2)
@@ -216,7 +214,7 @@ def main() -> None:
         ports = ".".join(map(str, device_rp2.port_numbers))
         print(f"RP2 {device_rp2.bus}-{ports}")
 
-        def find_octohub():
+        def find_octohub(device_rp2):
             for device_octohub in devices_octohub4:
                 if device_rp2.bus != device_octohub.bus:
                     continue
@@ -234,40 +232,8 @@ def main() -> None:
         except Exception as e:
             print(f"ValueError {e}")
 
-        device_octohub = find_octohub()
+        device_octohub = find_octohub(device_rp2=device_rp2)
         print(f"  Octohub4: {device_octohub.bus}-{device_octohub.port_numbers}")
-
-    return
-    if True:
-        u = Universe()
-        while u.populate(hub_devices=devices_octohub4):
-            u.print_tree()
-            print("-------------")
-    for hub in devices_octohub4:
-        if hub.port_number is None:
-            print("Päng")
-        else:
-            print(f"  port_number={hub.port_number}({hub.port_numbers})")
-        print(hub)
-        continue
-        try:
-            serial_number = hub.serial_number
-        except ValueError:
-            serial_number = None
-        print(f"{hub!r}")
-        if hub.parent is not None:
-            print(f"  parent={hub.parent!r}")
-        if False:
-            print(
-                f"  {hub.idVendor:04X}:{hub.idProduct:04X} serial_number={serial_number} port_number={hub.port_number}({hub.port_numbers})"
-            )
-            print(
-                f"  bus={hub.bus} parent.address={hub.address} bcdDevice={hub.bcdDevice} "
-            )
-            if hub.parent is not None:
-                print(f"  parent.bcdDevice={hub.parent.bcdDevice}")
-
-    print(f"*********** duration={time.monotonic()-begin_s:0.3f}s")
 
 
 if __name__ == "__main__":

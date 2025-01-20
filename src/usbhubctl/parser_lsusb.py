@@ -4,9 +4,11 @@ Elaborate the real topology using `lsusb -tv
 
 import itertools
 import re
+import typing
 from collections.abc import Iterator
 
-from usbhubctl import Path, ProductId, Topology
+if typing.TYPE_CHECKING:
+    from usbhubctl import Path, Topology
 
 RE_BUS1 = re.compile(
     r"^/:  Bus (?P<bus>\d+).Port (?P<port>\d+): Dev \d+, Class=root_hub,"
@@ -29,8 +31,8 @@ Example: '    ID 1d6b:0003 Linux Foundation 3.0 root hub'
 """
 
 
-def _parse(lsusb_output: str) -> Topology:
-    def iter_parse() -> Iterator[Path]:
+def _parse(lsusb_output: str) -> "Topology":
+    def iter_parse() -> Iterator["Path"]:
         lines = lsusb_output.strip().splitlines()
         assert len(lines) % 2 == 0
         current_nesting = 1
@@ -71,17 +73,20 @@ def _parse(lsusb_output: str) -> Topology:
                 vendor_product = match2.group("vendor_product")
                 current_path = current_path[: current_nesting - 2]
                 current_path.append(port)
-                # print(
-                #     f"{current_nesting=} {current_bus=} {current_path=} {port=} {device_class=} {vendor_product}"
-                # )
+                # pylint: disable=import-outside-toplevel
+                from usbhubctl import Path, ProductId
+
                 yield Path(
                     bus=current_bus,
                     path=current_path,
                     product_id=ProductId.parse(vendor_product),
                 )
 
+    # pylint: disable=import-outside-toplevel
+    from usbhubctl import Topology
+
     return Topology(list(iter_parse()))
 
 
-def get_real_topology(lsusb_output: str) -> Topology:
+def get_real_topology(lsusb_output: str) -> "Topology":
     return _parse(lsusb_output=lsusb_output)

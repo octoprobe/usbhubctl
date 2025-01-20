@@ -8,11 +8,11 @@ logger = logging.getLogger(__file__)
 
 FILENAME_USBHUBCTL_SYSFS = "usbhubctl_sysfs"
 
-_DIRECT_WRITE = True
+_DIRECT_FILE_ACCESS = True
 
 
 class BackendPowerSysFs(BackendPowerABC):
-    def power(self, full_paths: list["Path"], on: bool) -> None:
+    def set_power(self, full_paths: list["Path"], on: bool) -> None:
         """
         usbhubctl_sysfs /sys/bus/usb/devices/4-1:1.0/4-1-port1/disable 1
         """
@@ -22,7 +22,7 @@ class BackendPowerSysFs(BackendPowerABC):
 
         value = "0" if on else "1"
 
-        if _DIRECT_WRITE:
+        if _DIRECT_FILE_ACCESS:
             for full_path in full_paths:
                 pathlib.Path(full_path.sysfs_path).write_text(value)
                 return
@@ -39,3 +39,16 @@ class BackendPowerSysFs(BackendPowerABC):
             a = f"The binary '{FILENAME_USBHUBCTL_SYSFS}' was not found in the PATH."
             b = "You have to compile and install it manually: https://github.com/octoprobe/usbhubctl/blob/main/usbhubctl_sysfs/README.md"
             raise FileNotFoundError(f"{a}\n{b}") from e
+
+    def get_power(self, full_paths: list["Path"]) -> bool:
+        assert isinstance(full_paths, list)
+        for full_path in full_paths:
+            assert isinstance(full_path, Path)
+
+        if _DIRECT_FILE_ACCESS:
+            for full_path in full_paths:
+                value = pathlib.Path(full_path.sysfs_path).read_text().strip()
+                assert value in ("0", "1")
+                return value == "0"
+
+        raise NotImplementedError()

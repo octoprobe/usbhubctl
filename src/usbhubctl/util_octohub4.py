@@ -104,7 +104,7 @@ class Octohubs:
                 plug = plug0 + 1
                 on = plug_on.get(plug, default_on)
                 if on is not None:
-                    hub.get_plug(plug).power(on=on)
+                    hub.get_plug(plug).set_power(on=on)
 
     def find(self, usb_path_rp2: Path) -> DualConnectedHub:
         """

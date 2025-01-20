@@ -1,4 +1,4 @@
-__version__ = "0.0.3"
+__version__ = "0.1.1"
 
 __all__ = [
     "BackendPowerABC",
@@ -17,19 +17,19 @@ __all__ = [
     "Topology",
 ]
 
+from .parser_lsusb import get_real_topology
 from .usbhubctl import (
+    BackendPowerABC,
+    ConnectedHub,
+    ConnectedHubs,
+    ConnectedPlug,
+    DualConnectedHub,
+    DualConnectedHubs,
+    DualProductId,
     Hub,
     HubChip,
     Location,
     Path,
     ProductId,
-    DualConnectedHub,
-    DualConnectedHubs,
-    DualProductId,
     Topology,
-    ConnectedHub,
-    ConnectedHubs,
-    ConnectedPlug,
-    BackendPowerABC,
 )
-from .parser_lsusb import get_real_topology
