@@ -7,7 +7,14 @@ import time
 import pytest
 
 from usbhubctl import DualConnectedHub, DualConnectedHubs, Hub
-from usbhubctl.known_hubs import octohub4, rsh_a10, rsh_a16, rsh_a107, rsh_st07c
+from usbhubctl.known_hubs import (
+    octohub4,
+    rsh_a10,
+    rsh_a16,
+    rsh_a107,
+    rsh_st07,
+    rsh_st07c,
+)
 from usbhubctl.util_logging import init_logging
 
 
@@ -56,6 +63,11 @@ def test_toggle_rsh_st07c() -> None:
 
 
 @pytest.mark.live
+def test_toggle_rsh_st07() -> None:
+    _test_toggle(rsh_st07)
+
+
+@pytest.mark.live
 def test_toggle_rsh_a107() -> None:
     _test_toggle(rsh_a107)
 
@@ -69,4 +81,4 @@ if __name__ == "__main__":
     # test_toggle_rsh_a10()
     # test_toggle_rsh_a107()
 
-    print(f"Duration {time.monotonic()-begin_s:0.3f}s")
+    print(f"Duration {time.monotonic() - begin_s:0.3f}s")

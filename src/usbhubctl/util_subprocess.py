@@ -13,7 +13,7 @@ def subprocess_run(args: list[str], timeout_s: float = 10.0) -> str:
 
     begin_s = time.monotonic()
     proc = subprocess.run(
-        args,
+        args=args,
         check=False,
         capture_output=True,
         text=True,
@@ -23,7 +23,7 @@ def subprocess_run(args: list[str], timeout_s: float = 10.0) -> str:
 
     logger.debug(f"EXEC {args_text}")
     logger.debug(f"  returncode={proc.returncode}")
-    logger.debug(f"  duration={time.monotonic()-begin_s:0.3f}s")
+    logger.debug(f"  duration={time.monotonic() - begin_s:0.3f}s")
     logger.debug(f"  stdout: {proc.stdout}")
     logger.debug(f"  stderr: {proc.stderr}")
 
@@ -32,7 +32,7 @@ def subprocess_run(args: list[str], timeout_s: float = 10.0) -> str:
         logger.warning(f"STDERR: {proc.stderr}")
         logger.warning(f"STDOUT: {proc.stdout}")
         raise ValueError(
-            f"{args_text}:\n\nstderr: {proc.stderr}\n\nstdout: {proc.stdout}"
+            f"{args_text}:\nreturncode={proc.returncode}\nstderr: {proc.stderr}\n\nstdout: {proc.stdout}"
         )
 
     return proc.stdout
