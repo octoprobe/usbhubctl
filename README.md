@@ -13,7 +13,7 @@ To be improved
 
 ## Use Case
 
-![Image](https://de.rshtech.com/u_file/2011/products/12/c24d6de5bd.jpg.240x240.jpg)
+![Image](https://de.rshtech.com/u_file/2011/products/12/c24d6de5bd.jpg)
 
 I would like to switch on power on plug 3 on my RSH_A16 hub.
 

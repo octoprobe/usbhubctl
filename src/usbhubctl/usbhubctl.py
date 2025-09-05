@@ -15,6 +15,8 @@ import re
 from collections.abc import Iterator
 
 import serial
+import serial.tools
+import serial.tools.list_ports_linux
 import usb
 
 logger = logging.getLogger(__file__)

@@ -11,13 +11,23 @@ Find all rp2 in programming mode (pyusb)
 
 from __future__ import annotations
 
-from typing import Any
+import dataclasses
+import logging
+import time
+import typing
 
-import serial
 import usb.core
 import usb.util
-from serial.tools import list_ports
 from usb.legacy import CLASS_HUB
+
+from usbhubctl.usbhubctl import Location
+
+logger = logging.Logger(__file__)
+
+OCTOHUB4_PORT_RP2_INFRA = 1
+OCTOHUB4_PORT_RP2_BOOTMODE = 2
+OCTOHUB4_PORT_DUT = 3
+OCTOHUB4_PORT_LED_ERROR = 4
 
 # lsusb -d 2e8a:0005 -v
 
@@ -29,97 +39,30 @@ RP2_PRODUCT_APPLICATION_MODE = 0x0005
 OCTOHUB4_VENDOR = 0x0424
 OCTOHUB4_PRODUCT = 0x2514
 
-"""
-<DEVICE ID 0bda:5411 on Bus 003 Address 046>
-  parent=<DEVICE ID 0bda:5411 on Bus 003 Address 044>
-<DEVICE ID 0bda:5411 on Bus 003 Address 049>
-  parent=<DEVICE ID 0bda:5411 on Bus 003 Address 045>
-<DEVICE ID 0bda:5411 on Bus 003 Address 047>
-  parent=<DEVICE ID 0bda:5411 on Bus 003 Address 045>
-<DEVICE ID 0bda:5411 on Bus 003 Address 045>
-  parent=<DEVICE ID 0bda:5411 on Bus 003 Address 044>
-<DEVICE ID 0bda:5411 on Bus 003 Address 044>
-  parent=<DEVICE ID 1d6b:0002 on Bus 003 Address 001>
 
-<DEVICE ID 0bda:0411 on Bus 004 Address 010>
-  parent=<DEVICE ID 0bda:0411 on Bus 004 Address 008>
-<DEVICE ID 0bda:0411 on Bus 004 Address 013>
-  parent=<DEVICE ID 0bda:0411 on Bus 004 Address 009>
-<DEVICE ID 0bda:0411 on Bus 004 Address 011>
-  parent=<DEVICE ID 0bda:0411 on Bus 004 Address 009>
-<DEVICE ID 0bda:0411 on Bus 004 Address 009>
-  parent=<DEVICE ID 0bda:0411 on Bus 004 Address 008>
-<DEVICE ID 0bda:0411 on Bus 004 Address 008>
-  parent=<DEVICE ID 1d6b:0003 on Bus 004 Address 001>
+@dataclasses.dataclass
+class Rp2:
+    location: Location
+    application_mode: bool
+    port: int
 
-Root hubs:
-<DEVICE ID 1d6b:0002 on Bus 001 Address 001>
-<DEVICE ID 1d6b:0003 on Bus 002 Address 001>
-<DEVICE ID 1d6b:0002 on Bus 003 Address 001>
-<DEVICE ID 1d6b:0003 on Bus 004 Address 001>
-*********** duration=11.724s
-
-"""
+    @staticmethod
+    def factory(device: usb.core.Device, application_mode: bool) -> Location:
+        return Rp2(
+            location=Location.factory(device=device),
+            application_mode=application_mode,
+            port=OCTOHUB4_PORT_RP2_INFRA,
+        )
 
 
-class find_octohub4:
-    def __init__(self) -> None:
-        pass
+@dataclasses.dataclass
+class Tentacle:
+    octohub4_location: Location
 
-    def __call__(self, device) -> bool:
-        # first, let's check the device
-        if device.bDeviceClass == CLASS_HUB:
-            if device.idVendor == OCTOHUB4_VENDOR:
-                if device.idProduct == OCTOHUB4_PRODUCT:
-                    return True
-
-        # ok, transverse all devices to find an
-        # interface that matches our class
-        # for cfg in device:
-        #     # find_descriptor: what's it?
-        #     intf = usb.util.find_descriptor(cfg, bInterfaceClass=self._class)
-        #     if intf is not None:
-        #         return True
-
-        return False
+    rp2_infra: Rp2
 
 
-class find_rp2:
-    def __init__(self) -> None:
-        pass
-
-    def __call__(self, device) -> bool:
-        # first, let's check the device
-        if device.idVendor == RP2_VENDOR:
-            if device.idProduct in (
-                RP2_PRODUCT_APPLICATION_MODE,
-                RP2_PRODUCT_BOOT_MODE,
-            ):
-                return True
-
-        return False
-
-
-def serial_ports_ordered() -> list[serial.Serial]:
-    """
-    return ordered list of comports. Ignore the ones which do not have vid/pid defined.
-    """
-    ports = list(list_ports.comports())
-    ports.sort(key=lambda p: p.device)
-
-    return [p for p in ports if p.vid and p.pid]
-
-
-def serial_find_rp2() -> list[Any]:
-    for port in serial_ports_ordered():
-        if RP2_VENDOR != port.vid:
-            continue
-        if RP2_PRODUCT_APPLICATION_MODE != port.pid:
-            continue
-        yield port
-
-
-class QuerySerial:
+class UsbTentacleQuery:
     """
     Algorithm:
       * Query
@@ -149,91 +92,55 @@ class QuerySerial:
     """
 
     def __init__(self):
-        self.list_rp2_mode_application = self._query_rp2_application_mode()
-        self.list_rp2_mode_boot = self._query_rp2_boot_mode()
-        pass
+        def query_rp2() -> typing.Iterator[Rp2]:
+            for device in usb.core.find(idVendor=RP2_VENDOR, find_all=True):
+                assert device.idVendor == RP2_VENDOR
+                if device.idProduct == RP2_PRODUCT_BOOT_MODE:
+                    yield Rp2.factory(
+                        device=device,
+                        application_mode=False,
+                    )
+                if device.idProduct == RP2_PRODUCT_APPLICATION_MODE:
+                    yield Rp2.factory(
+                        device=device,
+                        application_mode=True,
+                    )
 
-    def _query_rp2_application_mode(self) -> list[serial.core.SysFs]:
-        def inner():
-            for port in list_ports.comports():
-                if port.vid != RP2_VENDOR:
-                    continue
-                if port.pid != RP2_PRODUCT_APPLICATION_MODE:
-                    continue
-                yield port
+        self.list_rp2 = list(query_rp2())
 
-        return list(inner())
+        self.list_location_octohub4 = [
+            Location.factory(d)
+            for d in usb.core.find(
+                find_all=True,
+                bDeviceClass=CLASS_HUB,
+                idVendor=OCTOHUB4_VENDOR,
+                idProduct=OCTOHUB4_PRODUCT,
+            )
+        ]
 
-    def _query_rp2_boot_mode(self) -> list[Any]:
-        devices = usb.core.find(
-            idVendor=RP2_VENDOR, idProduct=RP2_PRODUCT_BOOT_MODE, find_all=True
-        )
-        return list(devices)
+        def get_rp2_infra(octohub4_location: Location) -> Tentacle | None:
+            for rp2 in self.list_rp2:
+                if rp2.location.is_my_hub(octohub4_location):
+                    return Tentacle(octohub4_location=octohub4_location, rp2_infra=rp2)
+            return None
 
-    def print_rp2_application_mode(self) -> list[Any]:
-        for rp2 in self.list_rp2_mode_application:
-            print(f"Application Mode: {rp2.device} {rp2.location} {rp2.serial_number}")
-
-    def print_rp2_boot_mode(self) -> list[Any]:
-        for rp2 in self.list_rp2_mode_boot:
-            print(f"Boot Mode: {rp2.bus}-{rp2.port_numbers}")
-            hub = rp2.parent
-            if (hub.idVendor != OCTOHUB4_VENDOR) or (hub.idProduct != OCTOHUB4_PRODUCT):
-                # Not connected to octohub
-                print("  Not connected to octohub!")
+        self.tentacles: list[Tentacle] = []
+        for loc in self.list_location_octohub4:
+            rp2_infra = get_rp2_infra(loc)
+            if rp2_infra is None:
                 continue
+            self.tentacles.append(Tentacle(octohub4_location=loc, rp2_infra=rp2_infra))
+
+        print("Hallo")
 
 
 def main() -> None:
-    # rp2s = serial_find_rp2()
-    # for rp2 in rp2s:
-    #     print(rp2)
+    time_start_s = time.monotonic()
 
-    qs = QuerySerial()
-    qs.print_rp2_application_mode()
-    qs.print_rp2_boot_mode()
-
-    devices_octohub4 = usb.core.find(find_all=1, custom_match=find_octohub4())
-    devices_octohub4 = list(devices_octohub4)
-
-    for device_octohub in devices_octohub4:
-        ports = ".".join(map(str, device_octohub.port_numbers))
-        print(f"Octohub4 {device_octohub.bus}-{ports}")
-
-    # devices_rp2 = usb.core.find(find_all=1, custom_match=find_rp2())
-    devices_rp2 = usb.core.find(
-        idVendor=RP2_VENDOR, idProduct=RP2_PRODUCT_APPLICATION_MODE, find_all=True
-    )
-    if False:
-        for device_rp2 in devices_rp2:
-            sn = usb.util.get_string(device_rp2, device_rp2.iSerialNumber, langid=1033)
-
-    devices_rp2 = list(devices_rp2)
-
-    for device_rp2 in devices_rp2:
-        ports = ".".join(map(str, device_rp2.port_numbers))
-        print(f"RP2 {device_rp2.bus}-{ports}")
-
-        def find_octohub(device_rp2):
-            for device_octohub in devices_octohub4:
-                if device_rp2.bus != device_octohub.bus:
-                    continue
-                if device_rp2.port_numbers[:-1] == device_octohub.port_numbers:
-                    return device_octohub
-            raise IndexError("Not found")
-
-        # https://github.com/pyusb/pyusb/issues/139#issuecomment-241149806
-        # device_rp2._langids = (1033,)
-
-        print(f"Serial: {device_rp2._get_full_descriptor_str()}")
-        try:
-            sn = usb.util.get_string(device_rp2, device_rp2.iSerialNumber, langid=1033)
-            print(f"Serial2: {sn}")
-        except Exception as e:
-            print(f"ValueError {e}")
-
-        device_octohub = find_octohub(device_rp2=device_rp2)
-        print(f"  Octohub4: {device_octohub.bus}-{device_octohub.port_numbers}")
+    qs = UsbTentacleQuery()
+    # qs.print_rp2_application_mode()
+    # qs.print_rp2_boot_mode()
+    print(f"{time.monotonic()-time_start_s:0.3f}s")
 
 
 if __name__ == "__main__":

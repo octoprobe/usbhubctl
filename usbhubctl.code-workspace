@@ -81,10 +81,6 @@
 			"editor.formatOnSave": true,
 			"editor.defaultFormatter": "charliermarsh.ruff"
 		},
-		// "ruff.enable": true,
-		// "ruff.fixAll": true,
-		// "ruff.lint.enable": true,
-		"ruff.lint.run": "onSave",
 		"mpremote.srcSubdirectory": "src",
 		"python.testing.pytestArgs": [
 			"tests"
