@@ -25,7 +25,7 @@ class BackendPowerSysFs(BackendPowerABC):
         if _DIRECT_FILE_ACCESS:
             for full_path in full_paths:
                 pathlib.Path(full_path.sysfs_path).write_text(value)
-                return
+            return
 
         args = [FILENAME_USBHUBCTL_SYSFS]
         for full_path in full_paths:
